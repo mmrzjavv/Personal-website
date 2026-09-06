@@ -144,7 +144,7 @@ export default function Home() {
         )}
 
         <header className={`site-header fixed top-0 inset-x-0 z-50 px-6 sm:px-10 md:px-14 py-5 flex items-center justify-between pointer-events-none ${isHeaderScrolled ? "site-header--scrolled" : ""}`}>
-          <div className="flex items-center gap-3 pointer-events-auto">
+          <div className="site-header__identity flex items-center gap-3 pointer-events-auto">
             <Image
               src="/profile-photo.jpg"
               alt={t("header.name")}
@@ -152,14 +152,14 @@ export default function Home() {
               height={32}
               className="w-8 h-8 rounded-full object-cover border border-ice-400/50"
             />
-            <span data-cursor="hover" className="text-sm font-semibold tracking-tight text-ice-100 whitespace-nowrap">
+            <span data-cursor="hover" className="site-header__name text-sm font-semibold tracking-tight text-ice-100 whitespace-nowrap">
               {t("header.name")}
             </span>
             <span className="hidden md:inline-flex">
               <span className="status-pill">{t("header.availability")}</span>
             </span>
           </div>
-          <div className="flex items-center gap-2 pointer-events-auto">
+          <div className="site-header__controls flex items-center gap-2 pointer-events-auto">
             <SeasonPicker />
             <span className="hidden md:inline-flex">
               <a
@@ -184,7 +184,7 @@ export default function Home() {
         <main className="relative z-10 pointer-events-none">
           <section data-kb-section="hero" className="min-h-screen flex flex-col justify-center p-6 sm:p-10 md:p-14">
             {isMobile && (
-              <div className="w-full h-[34vh] mt-12 -mb-4 pointer-events-auto">
+              <div className="hero-keyboard pointer-events-auto">
                 <FrozenKeyboard mobile />
               </div>
             )}

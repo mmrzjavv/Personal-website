@@ -127,10 +127,10 @@ export default function ProjectModal({ project, onClose }: Props) {
                 {pick(project.details, lang)}
               </p>
 
-              {(project.previewPath || project.github) && (
+              {(project.url || project.github) && (
                 <div className="flex flex-wrap gap-3 mb-6">
                   <a
-                    href={project.previewPath}
+                    href={project.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     data-cursor="hover"
@@ -150,7 +150,7 @@ export default function ProjectModal({ project, onClose }: Props) {
                       <rect x="3" y="4" width="18" height="14" rx="2" />
                       <path d="M8 21h8M12 18v3" />
                     </svg>
-                    {t("projects.preview")}
+                    {t("projects.openProject")}
                   </a>
                   {project.github && (
                     <a

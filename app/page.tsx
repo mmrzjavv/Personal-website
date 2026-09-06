@@ -263,7 +263,7 @@ export default function Home() {
                       <Reveal delay={200} className="project-card__navigation">
                         <ProjectNavigation
                           activeIndex={activeProjectIndex}
-                          total={projects.length}
+                          total={projectRecords.length}
                           onMove={goToProject}
                           ariaLabel={t("projects.navigation")}
                           previousLabel={t("projects.previous")}
@@ -289,7 +289,7 @@ export default function Home() {
                       <div className="project-card__content">
                         <div className="project-card__meta">
                           <span>{activeProject.num} · {t("projects.kicker")}</span>
-                          <span>{t("projects.liveLabel")}</span>
+                          <span>{t("projects.projectLabel")}</span>
                         </div>
                         <Reveal><h2 className="project-card__title font-semibold tracking-tight text-ice-50 leading-[1.05] mb-4">{pick(activeProject.name, lang)}</h2></Reveal>
                         <Reveal delay={100}><p className="text-base sm:text-lg text-ice-200 leading-relaxed mb-6">{pick(activeProject.desc, lang)}</p></Reveal>
@@ -300,9 +300,9 @@ export default function Home() {
                         </Reveal>
                         <Reveal delay={220}>
                           <div className="flex flex-wrap gap-3">
-                            <a href={activeProject.previewPath} target="_blank" rel="noopener noreferrer" data-cursor="hover" data-magnetic className="frost-btn frost-btn--primary">
+                            <a href={activeProject.url} target="_blank" rel="noopener noreferrer" data-cursor="hover" data-magnetic className="frost-btn frost-btn--primary">
                               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><rect x="3" y="4" width="18" height="14" rx="2" /><path d="M8 21h8M12 18v3" /></svg>
-                              {t("projects.preview")}
+                              {t("projects.openProject")}
                             </a>
                             <button type="button" onClick={() => setSelectedProject(activeProject)} data-cursor="hover" data-magnetic className="frost-btn">
                               {t("projects.viewMore")}
@@ -311,8 +311,8 @@ export default function Home() {
                           </div>
                         </Reveal>
                         <div className="project-card__footnote">
-                          <span>{t("projects.previewHint")}</span>
-                          <a href={activeProject.previewPath} target="_blank" rel="noopener noreferrer" data-cursor="hover">{t("projects.preview")}</a>
+                          <span>{t("projects.openProjectHint")}</span>
+                          <a href={activeProject.url} target="_blank" rel="noopener noreferrer" data-cursor="hover">{t("projects.openProject")}</a>
                         </div>
                       </div>
                     </div>

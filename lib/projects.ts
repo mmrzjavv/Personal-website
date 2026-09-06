@@ -10,8 +10,6 @@ export interface ProjectRecord {
   desc: Localised;
   details: Localised;
   url: string;
-  previewPath: string;
-  previewMode: "iframe" | "gallery";
   media: string[];
   highlights: string[];
   align: "left" | "right";

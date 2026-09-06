@@ -122,8 +122,8 @@ def seed_from_json(settings: Settings) -> None:
                 INSERT INTO portfolio_projects
                     (slug, num, title_fa, title_en, description_fa, description_en,
                      details_fa, details_en,
-                     project_url, stack, highlights, align, section, preview_mode, sort_order)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                     project_url, stack, highlights, align, section, sort_order)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
                 """,
                 (
@@ -140,7 +140,6 @@ def seed_from_json(settings: Settings) -> None:
                     project.get("highlights", []),
                     project.get("align", "left"),
                     project.get("section", f"project{order + 1}"),
-                    project.get("previewMode", "iframe"),
                     order,
                 ),
             )
@@ -198,8 +197,6 @@ def _to_project(row: dict[str, Any], images: Iterable[dict[str, Any]], storage: 
             "en": row.get("details_en") or row["description_en"] or row["description_fa"],
         },
         "url": row["project_url"],
-        "previewPath": f"/projects/{row['slug']}/preview",
-        "previewMode": row["preview_mode"],
         "media": media,
         "highlights": row["highlights"] or [],
         "align": row["align"],

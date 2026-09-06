@@ -275,13 +275,13 @@ export default function Home() {
                           <div className="project-card__browser-bar">
                             <span className="project-card__dots" aria-hidden><i /><i /><i /></span>
                             <span className="project-card__url">{activeProject.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}</span>
-                            <span className="project-card__live-dot" aria-label="Live preview" />
+                            <span className="project-card__live-dot" aria-hidden />
                           </div>
                           <ProjectCardMedia
                             media={activeProject.media}
-                            alt={`${pick(activeProject.name, lang)} preview`}
+                            alt={`${pick(activeProject.name, lang)} project image`}
                             onOpen={() => setSelectedProject(activeProject)}
-                            previewLabel={t("projects.viewImages")}
+                            imageLabel={t("projects.viewImages")}
                           />
                         </div>
                       </div>

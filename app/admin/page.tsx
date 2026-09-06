@@ -223,12 +223,12 @@ export default function AdminPage() {
               {projects.map((project) => (
                 <article key={project.id} className="admin-project-item">
                   {project.media[0] ? (
-                    // MinIO may live on a separate host, so this preview uses
+                    // MinIO may live on a separate host, so this thumbnail uses
                     // the remote object URL directly instead of next/image.
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={project.media[0]} alt="" />
                   ) : <div className="admin-project-item__placeholder" />}
-                  <div className="admin-project-item__body"><p className="admin-eyebrow">{project.num} · {project.slug}</p><h3>{project.name.fa}</h3><a href={project.url} target="_blank" rel="noreferrer">پیش‌نمایش پروژه</a></div>
+                  <div className="admin-project-item__body"><p className="admin-eyebrow">{project.num} · {project.slug}</p><h3>{project.name.fa}</h3><a href={project.url} target="_blank" rel="noreferrer">ورود به پروژه</a></div>
                   <div className="admin-project-item__actions">
                     <button type="button" className="admin-edit" onClick={() => handleEdit(project)}>ویرایش</button>
                     <button type="button" className="admin-delete" onClick={() => void handleDelete(project.id)}>حذف</button>

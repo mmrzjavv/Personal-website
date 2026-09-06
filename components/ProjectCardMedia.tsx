@@ -7,10 +7,10 @@ type Props = {
   media: string[];
   alt: string;
   onOpen: () => void;
-  previewLabel: string;
+  imageLabel: string;
 };
 
-export default function ProjectCardMedia({ media, alt, onOpen, previewLabel }: Props) {
+export default function ProjectCardMedia({ media, alt, onOpen, imageLabel }: Props) {
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
@@ -31,7 +31,7 @@ export default function ProjectCardMedia({ media, alt, onOpen, previewLabel }: P
         type="button"
         className="project-card__image-button"
         onClick={onOpen}
-        aria-label={`${previewLabel}: ${alt}`}
+        aria-label={`${imageLabel}: ${alt}`}
         data-cursor="hover"
       >
         <span className="project-card__image-stack" aria-hidden={media.length < 2}>
@@ -62,7 +62,7 @@ export default function ProjectCardMedia({ media, alt, onOpen, previewLabel }: P
         </span>
         <span className="project-card__image-shade" aria-hidden />
         <span className="project-card__image-action">
-          <span>{previewLabel}</span>
+          <span>{imageLabel}</span>
           <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M5 12h14M13 5l7 7-7 7" /></svg>
         </span>
       </button>
@@ -76,7 +76,7 @@ export default function ProjectCardMedia({ media, alt, onOpen, previewLabel }: P
                 type="button"
                 onClick={() => goTo(index)}
                 className={`project-card__media-dot ${index === activeIndex ? "project-card__media-dot--active" : ""}`}
-                aria-label={`${previewLabel} ${index + 1}`}
+                aria-label={`${imageLabel} ${index + 1}`}
                 aria-current={index === activeIndex ? "true" : undefined}
                 data-cursor="hover"
               />

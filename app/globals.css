@@ -177,9 +177,7 @@ html[dir="rtl"] .font-mono {
   letter-spacing: 0;
 }
 html[dir="rtl"] .project-card__url,
-html[dir="rtl"] .project-preview__domain,
-html[dir="rtl"] .project-card__browser-bar,
-html[dir="rtl"] .project-preview__chrome {
+html[dir="rtl"] .project-card__browser-bar {
   direction: ltr;
   unicode-bidi: plaintext;
 }
@@ -207,13 +205,6 @@ html[dir="rtl"] .project-card__image-action {
 html[dir="rtl"] .project-card__media-controls {
   right: 0.9rem;
   left: auto;
-}
-html[dir="rtl"] .project-preview__bar,
-html[dir="rtl"] .project-preview__footer {
-  direction: rtl;
-}
-html[dir="rtl"] .project-preview__back svg {
-  transform: scaleX(-1);
 }
 html[dir="rtl"] .projects-scroll-hint__arrow {
   direction: ltr;
@@ -751,7 +742,7 @@ html[dir="rtl"] .projects-scroll-hint__arrow {
     0 0 42px -24px rgba(122, 166, 208, 0.55);
   transform: translateY(-5px) rotateX(1deg);
 }
-/* Project cards use one stable composition: preview on the left, copy on the
+/* Project cards use one stable composition: image on the left, copy on the
    right. The old alternating order made the carousel jump between layouts. */
 .project-card--right .project-card__visual { order: 1; }
 .project-card--right .project-card__content { order: 2; }
@@ -770,8 +761,7 @@ html[dir="rtl"] .projects-scroll-hint__arrow {
   background: var(--ink-0);
   box-shadow: 0 24px 42px -25px rgba(0, 0, 0, 0.95);
 }
-.project-card__browser-bar,
-.project-preview__chrome {
+.project-card__browser-bar {
   display: flex;
   align-items: center;
   gap: 0.7rem;
@@ -978,183 +968,6 @@ html[dir="rtl"] .projects-scroll-hint__arrow {
   transition: color 200ms ease;
 }
 .project-card__footnote a:hover { color: var(--ice-50); }
-
-/* ─── Fullscreen same-domain product preview ─────────────────────────── */
-
-.project-preview-page {
-  position: relative;
-  z-index: 10;
-  display: flex;
-  min-height: 100svh;
-  flex-direction: column;
-  padding: 0.75rem;
-}
-.project-preview__bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  width: min(100%, 110rem);
-  margin: 0 auto;
-  padding: 0.7rem 0.8rem 0.7rem 1rem;
-  border: 1px solid rgba(166, 197, 228, 0.22);
-  border-radius: 1rem;
-  background: rgba(10, 20, 40, 0.62);
-  box-shadow: 0 16px 40px -30px rgba(0, 0, 0, 0.9);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-}
-.project-preview__identity,
-.project-preview__actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  min-width: 0;
-}
-.project-preview__back {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.35rem;
-  height: 2.35rem;
-  flex: none;
-  color: var(--ice-200);
-  border: 1px solid rgba(166, 197, 228, 0.2);
-  border-radius: 0.7rem;
-  background: rgba(19, 31, 58, 0.58);
-  transition: color 200ms ease, background 200ms ease, transform 200ms ease;
-}
-.project-preview__back:hover { color: var(--ice-50); background: var(--ink-2); transform: translateX(-2px); }
-.project-preview__open {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  min-height: 2.35rem;
-  padding: 0.55rem 0.8rem;
-  color: var(--ice-100);
-  border: 1px solid rgba(166, 197, 228, 0.24);
-  border-radius: 0.7rem;
-  background: rgba(19, 31, 58, 0.58);
-  font-size: 0.75rem;
-  white-space: nowrap;
-  transition: color 200ms ease, background 200ms ease, border-color 200ms ease;
-}
-.project-preview__open:hover {
-  color: var(--ice-50);
-  border-color: rgba(166, 197, 228, 0.46);
-  background: rgba(40, 62, 98, 0.72);
-}
-.project-preview__number {
-  color: var(--ice-400);
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 0.75rem;
-}
-.project-preview__eyebrow {
-  margin-bottom: 0.15rem;
-  color: var(--ice-400);
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 0.6rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-.project-preview__identity h1 {
-  overflow: hidden;
-  color: var(--ice-50);
-  font-size: clamp(0.9rem, 2vw, 1.2rem);
-  font-weight: 650;
-  letter-spacing: -0.02em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.project-preview__domain {
-  max-width: 25vw;
-  overflow: hidden;
-  color: var(--ice-300);
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 0.65rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.project-preview__stage {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  width: min(100%, 110rem);
-  min-height: 0;
-  margin: 0.75rem auto 0;
-}
-.project-preview__glass {
-  position: relative;
-  display: flex;
-  width: 100%;
-  height: clamp(30rem, calc(100svh - 6.25rem), 86rem);
-  flex-direction: column;
-  overflow: hidden;
-  border: 1px solid rgba(166, 197, 228, 0.28);
-  border-radius: 1.25rem;
-  background: rgba(5, 11, 22, 0.7);
-  box-shadow: 0 30px 90px -50px rgba(0, 0, 0, 0.95);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-}
-.project-preview__chrome { flex: none; }
-.project-preview__frame {
-  width: 100%;
-  min-height: 0;
-  flex: 1;
-  border: 0;
-  outline: 0;
-  box-shadow: none;
-  background: #fff;
-}
-.project-preview__gallery {
-  position: relative;
-  min-height: 0;
-  flex: 1;
-  background: var(--ink-0);
-}
-.project-preview__gallery .carousel__img {
-  object-fit: contain;
-  background: var(--ink-0);
-}
-.project-preview__loading {
-  position: absolute;
-  inset: 2.35rem 0 0;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.7rem;
-  color: var(--ice-200);
-  background: linear-gradient(135deg, rgba(5, 11, 22, 0.95), rgba(10, 20, 40, 0.8));
-  pointer-events: none;
-  transition: opacity 300ms ease;
-}
-.preview-spinner {
-  width: 1rem;
-  height: 1rem;
-  border: 2px solid rgba(166, 197, 228, 0.24);
-  border-top-color: var(--ice-100);
-  border-radius: 9999px;
-  animation: preview-spin 800ms linear infinite;
-}
-@keyframes preview-spin { to { transform: rotate(360deg); } }
-.project-preview__footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  width: min(100%, 110rem);
-  margin: 0 auto;
-  padding: 0 0.4rem;
-  color: var(--ice-400);
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 0.65rem;
-}
-.project-preview__route { color: var(--ice-200); }
-.project-preview__route:hover { color: var(--ice-50); }
 
 /* Short laptop viewports, including most 13-inch displays. Keep the 3D
    composition but make the content fit the first viewport more naturally. */
@@ -1367,27 +1180,12 @@ html[dir="rtl"] .projects-scroll-hint__arrow {
     white-space: normal;
     overflow-wrap: anywhere;
   }
-  .project-preview-page { padding: 0.55rem; }
-  .project-preview__bar { align-items: flex-start; flex-direction: column; padding: 0.65rem; }
-  .project-preview__identity,
-  .project-preview__actions,
-  .project-preview__open { width: 100%; }
-  .project-preview__identity h1 {
-    overflow: visible;
-    text-overflow: clip;
-    white-space: normal;
-    line-height: 1.25;
-  }
-  .project-preview__open { justify-content: center; }
-  .project-preview__stage { margin: 0.55rem auto 0; }
-  .project-preview__glass { height: calc(100svh - 6.7rem); min-height: 22rem; border-radius: 0.9rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .project-card,
   .project-card__image,
-  .project-card__image-action,
-  .preview-spinner { animation: none; transition: none; }
+  .project-card__image-action { animation: none; transition: none; }
 }
 
 /* ─── Admin content panel ────────────────────────────────────────────── */

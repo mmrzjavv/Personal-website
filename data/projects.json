@@ -1,0 +1,76 @@
+{
+  "projects": [
+    {
+      "slug": "volera",
+      "num": "01",
+      "name": {
+        "fa": "Volera — پلتفرم پیام‌رسانی",
+        "en": "Volera — Real-time Messaging Platform"
+      },
+      "stack": ["React", "Next.js", "TypeScript", "C# / .NET", "PostgreSQL"],
+      "desc": {
+        "fa": "یک پلتفرم پیام‌رسانی سریع برای گفت‌وگوهای فردی و گروهی، با وضعیت آنلاین و تجربه‌ای روان در وب.",
+        "en": "A fast messaging platform for one-to-one and team conversations, with presence and a smooth web experience."
+      },
+      "details": {
+        "fa": "در Volera روی ساخت یک تجربه‌ی ارتباطی زنده و قابل اتکا تمرکز کردم؛ از فهرست گفتگوها و وضعیت حضور کاربران تا رابط کاربری تاریک، واکنش‌گرا و مناسب استفاده‌ی روزمره.",
+        "en": "Volera focuses on a dependable, live communication experience — from conversation lists and user presence to a responsive dark interface built for everyday use."
+      },
+      "url": "https://volera.pars-peyman.ir/",
+      "previewPath": "/projects/volera/preview",
+      "previewMode": "iframe",
+      "media": ["/projects/volera-chat.png"],
+      "highlights": ["react", "nextdotjs", "typescript", "postgresql"],
+      "align": "left",
+      "section": "project1"
+    },
+    {
+      "slug": "ping",
+      "num": "02",
+      "name": {
+        "fa": "Ping — شبکه‌ی اجتماعی و تایم‌لاین تعاملی",
+        "en": "Ping — Social Network & Interactive Timeline"
+      },
+      "stack": ["React", "Next.js", "TypeScript", "Authentication", "Responsive UI"],
+      "desc": {
+        "fa": "یک شبکه‌ی اجتماعی سبک برای انتشار محتوا، دنبال‌کردن موضوعات و تعامل سریع با یک تایم‌لاین آشنا و واکنش‌گرا.",
+        "en": "A lightweight social network for sharing, following topics, and quick interaction through a familiar, responsive timeline."
+      },
+      "details": {
+        "fa": "Ping با تمرکز بر کشف محتوا و تعامل ساخته شده است؛ جریانی ساده برای پست‌ها، موضوعات داغ، پروفایل‌ها و ارتباط اجتماعی در یک رابط سریع.",
+        "en": "Ping is built around content discovery and interaction, bringing posts, trends, profiles, and social connections together in a fast interface."
+      },
+      "url": "https://ping.pars-peyman.ir/",
+      "previewPath": "/projects/ping/preview",
+      "previewMode": "iframe",
+      "media": ["/projects/ping-social.png"],
+      "highlights": ["react", "nextdotjs", "typescript"],
+      "align": "left",
+      "section": "project2"
+    },
+    {
+      "slug": "soha-crm",
+      "num": "03",
+      "name": {
+        "fa": "Soha — اپلیکیشن نوبت‌گیری و ارتباط با مشتریان",
+        "en": "Soha — Customer Appointment & Relationship App"
+      },
+      "stack": ["React", "Next.js", "TypeScript", "CRM", "RTL Product UI"],
+      "desc": {
+        "fa": "یک اپلیکیشن یکپارچه برای مدیریت نوبت‌ها، اطلاعات مشتریان و کارهای روزانه‌ی مجموعه.",
+        "en": "An integrated app for managing appointments, customer information, and everyday operations."
+      },
+      "details": {
+        "fa": "این محصول فرایند نوبت‌گیری و ارتباط با مشتریان را در یک تجربه‌ی ساده جمع می‌کند؛ از صفحه‌ی معرفی و دریافت نوبت تا داشبورد مدیریتی، پیگیری درخواست‌ها و مشاهده‌ی اطلاعات عملیاتی.",
+        "en": "Soha brings appointments and customer communication into one simple experience — from the public booking flow to an operational dashboard for tracking requests and information."
+      },
+      "url": "https://sohacrm.ir/",
+      "previewPath": "/projects/soha-crm/preview",
+      "previewMode": "iframe",
+      "media": ["/projects/crm-landing.png", "/projects/crm-dashboard-v2.png"],
+      "highlights": ["react", "nextdotjs", "typescript"],
+      "align": "left",
+      "section": "project3"
+    }
+  ]
+}

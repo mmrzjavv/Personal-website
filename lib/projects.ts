@@ -9,7 +9,7 @@ export interface ProjectRecord {
   stack: string[];
   desc: Localised;
   details: Localised;
-  url: string;
+  url: string | null;
   media: string[];
   highlights: string[];
   align: "left" | "right";

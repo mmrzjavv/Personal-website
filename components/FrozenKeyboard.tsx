@@ -126,13 +126,13 @@ const SECTION_STATES: Record<string, KeyboardState> = {
 // no per-section choreography — the keyboard sits centered with a permanent
 // cinematic idle swing and reacts to taps instead of hover.
 const MOBILE_STATE: KeyboardState = {
-  yaw: Math.PI * 0.16,
-  pitch: Math.PI * 0.2,
+  yaw: Math.PI * 0.08,
+  pitch: Math.PI * 0.12,
   roll: 0.02,
   posX: 0,
-  posY: 0,
+  posY: -0.1,
   posZ: 0,
-  scale: 1.55,
+  scale: 1.38,
 };
 
 // Track which data-kb-section element is currently most prominent on-screen.
@@ -622,7 +622,7 @@ function Keycap({
           <meshStandardMaterial
             ref={matRef}
             color="#ffffff"
-            roughness={isMobile ? 0.4 : 0.34}
+            roughness={isMobile ? 0.48 : 0.34}
             metalness={0}
             emissive="#ffffff"
             emissiveIntensity={0.3}
@@ -883,15 +883,16 @@ export default function FrozenKeyboard({
       // off-axis desktop composition.
       camera={
         mobile
-          ? { position: [0, 2.0, 9.0], fov: 26 }
+          ? { position: [0, 1.45, 9.2], fov: 29 }
           : { position: [1.5, 3.6, 11], fov: 22 }
       }
-      dpr={[1, 1.25]}
+      dpr={mobile ? [1, 1.6] : [1, 1.25]}
       gl={{
-        antialias: !mobile,
+        antialias: true,
         alpha: true,
         powerPreference: "high-performance",
       }}
+      style={{ width: "100%", height: "100%", touchAction: "none" }}
     >
       {/* Canvas is transparent so the FrozenBackground (snow + aurora) shows
           through behind/around the keyboard. */}

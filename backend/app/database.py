@@ -44,7 +44,7 @@ def init_schema(settings: Settings) -> None:
                 description_en TEXT NOT NULL DEFAULT '',
                 details_fa TEXT NOT NULL DEFAULT '',
                 details_en TEXT NOT NULL DEFAULT '',
-                project_url TEXT NOT NULL,
+                project_url TEXT,
                 stack TEXT[] NOT NULL DEFAULT '{}',
                 highlights TEXT[] NOT NULL DEFAULT '{}',
                 align TEXT NOT NULL DEFAULT 'left' CHECK (align IN ('left', 'right')),
@@ -59,6 +59,7 @@ def init_schema(settings: Settings) -> None:
         )
         connection.execute("ALTER TABLE portfolio_projects ADD COLUMN IF NOT EXISTS details_fa TEXT NOT NULL DEFAULT ''")
         connection.execute("ALTER TABLE portfolio_projects ADD COLUMN IF NOT EXISTS details_en TEXT NOT NULL DEFAULT ''")
+        connection.execute("ALTER TABLE portfolio_projects ALTER COLUMN project_url DROP NOT NULL")
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS portfolio_project_images (
@@ -135,7 +136,7 @@ def seed_from_json(settings: Settings) -> None:
                     project.get("desc", {}).get("en", ""),
                     project.get("details", {}).get("fa", ""),
                     project.get("details", {}).get("en", ""),
-                    project.get("url", ""),
+                    project.get("url") or None,
                     project.get("stack", []),
                     project.get("highlights", []),
                     project.get("align", "left"),
@@ -253,7 +254,7 @@ def create_project(
     title_en: str,
     description_fa: str,
     description_en: str,
-    project_url: str,
+    project_url: str | None,
     stack: list[str],
     image_sources: list[dict[str, str | None]],
     storage: ObjectStorage | None,
@@ -310,7 +311,7 @@ def update_project(
     title_en: str,
     description_fa: str,
     description_en: str,
-    project_url: str,
+    project_url: str | None,
     stack: list[str],
     image_sources: list[dict[str, str | None]],
     replace_images: bool,

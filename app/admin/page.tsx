@@ -15,7 +15,7 @@ interface AdminProject {
   num: string;
   name: { fa: string; en: string };
   desc: { fa: string; en: string };
-  url: string;
+  url: string | null;
   media: string[];
   mediaItems?: AdminProjectImage[];
   stack: string[];
@@ -165,7 +165,7 @@ export default function AdminPage() {
       titleEn: project.name.en,
       descriptionFa: project.desc.fa,
       descriptionEn: project.desc.en,
-      url: project.url,
+      url: project.url ?? "",
       stack: project.stack.join(", "),
     });
     setEditingImages(getImages(project));
@@ -201,7 +201,7 @@ export default function AdminPage() {
       body.append("title_en", form.titleEn.trim());
       body.append("description_fa", form.descriptionFa.trim());
       body.append("description_en", form.descriptionEn.trim());
-      body.append("project_url", form.url.trim());
+      if (form.url.trim()) body.append("project_url", form.url.trim());
       body.append("stack", form.stack);
       if (editingId !== null) {
         body.append("replace_images", String(files.length > 0 && uploadMode === "replace"));
@@ -408,7 +408,7 @@ export default function AdminPage() {
               <label>عنوان انگلیسی<input value={form.titleEn} onChange={(event) => handleFormChange("titleEn", event.target.value)} /></label>
               <label>توضیح فارسی<textarea rows={3} value={form.descriptionFa} onChange={(event) => handleFormChange("descriptionFa", event.target.value)} /></label>
               <label>توضیح انگلیسی<textarea rows={3} value={form.descriptionEn} onChange={(event) => handleFormChange("descriptionEn", event.target.value)} /></label>
-              <label>لینک پروژه<input required type="url" placeholder="https://example.com" value={form.url} onChange={(event) => handleFormChange("url", event.target.value)} /></label>
+              <label>لینک پروژه <span>(اختیاری؛ اگر ندارد خالی بگذارید)</span><input type="url" placeholder="https://example.com" value={form.url} onChange={(event) => handleFormChange("url", event.target.value)} /></label>
               <label>تکنولوژی‌ها <span>(با ویرگول جدا کنید)</span><input placeholder="React, Next.js, PostgreSQL" value={form.stack} onChange={(event) => handleFormChange("stack", event.target.value)} /></label>
 
               {editingId !== null && (
@@ -489,7 +489,7 @@ export default function AdminPage() {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={thumbnail} alt="" />
                     ) : <div className="admin-project-item__placeholder" />}
-                    <div className="admin-project-item__body"><p className="admin-eyebrow">{String(index + 1).padStart(2, "0")} · {project.slug}</p><h3>{project.name.fa}</h3><a href={project.url} target="_blank" rel="noreferrer">ورود به پروژه</a><span className="admin-media-count">{imageCount} تصویر</span></div>
+                    <div className="admin-project-item__body"><p className="admin-eyebrow">{String(index + 1).padStart(2, "0")} · {project.slug}</p><h3>{project.name.fa}</h3>{project.url && <a href={project.url} target="_blank" rel="noreferrer">ورود به پروژه</a>}<span className="admin-media-count">{imageCount} تصویر</span></div>
                     <div className="admin-project-item__actions">
                       <div className="admin-order-actions">
                         <button type="button" onClick={() => moveProject(index, -1)} disabled={index === 0 || isLoading} aria-label="انتقال پروژه به بالا">↑</button>

@@ -300,11 +300,10 @@ const BASE_HEIGHT = 0.26;
 const ICON_PLANE_SIZE = KEYCAP_SIZE * KEYCAP_TOP_SCALE * 0.78;
 const PRESS_DEPTH = 0.15;
 
-// Mechanical keyboard "tock" samples plus a tiny synthesized fallback. One
-// AudioContext per tab, lazily created on first interaction.
-// Browsers block audio until a real user gesture (click/keydown) — pointerover
-// does not count in Chrome. A one-shot unlock listener resumes the context on
-// the first real interaction so every subsequent hover plays immediately.
+// Mechanical keyboard "tock" samples plus a tiny synthesized fallback. Keep
+// one AudioContext per tab. The context and samples are prepared when the
+// keyboard mounts, while a capture-phase listener unlocks/resumes the context
+// before React Three Fiber receives the first real click or keydown.
 let audioCtx: AudioContext | null = null;
 let audioUnlockInstalled = false;
 
@@ -325,16 +324,27 @@ function installAudioUnlock() {
   audioUnlockInstalled = true;
   const unlock = () => {
     const ctx = getAudioContext();
-    if (ctx?.state === "suspended") {
-      ctx.resume().catch(() => {});
+    if (!ctx) return;
+    const state = ctx.state as string;
+    if (state === "suspended" || state === "interrupted") {
+      void ctx.resume().catch(() => {});
     }
-    window.removeEventListener("pointerdown", unlock);
-    window.removeEventListener("keydown", unlock);
-    window.removeEventListener("touchstart", unlock);
+    // Decode as soon as the browser gives us a legitimate interaction. The
+    // promise is shared, so repeated key presses never start duplicate fetches.
+    void loadKeySounds(ctx);
   };
-  window.addEventListener("pointerdown", unlock, { once: false });
-  window.addEventListener("keydown", unlock, { once: false });
-  window.addEventListener("touchstart", unlock, { once: false });
+  window.addEventListener("pointerdown", unlock, {
+    capture: true,
+    passive: true,
+  });
+  window.addEventListener("keydown", unlock, {
+    capture: true,
+    passive: true,
+  });
+  window.addEventListener("touchstart", unlock, {
+    capture: true,
+    passive: true,
+  });
 }
 // Two pre-decoded samples (press / release) — pick one at random on each
 // hover for variety. Fetched + decoded once on first play; subsequent hovers
@@ -384,6 +394,7 @@ function playKeyClick(seed = 0) {
   const ctx = getAudioContext();
   if (!ctx) return;
   installAudioUnlock();
+  void loadKeySounds(ctx);
 
   const trigger = () => {
     const available = keySoundBuffers.filter(
@@ -417,16 +428,13 @@ function playKeyClick(seed = 0) {
     }
   };
 
-  if (ctx.state === "suspended") {
-    // Do not drop the first click while resuming after browser autoplay lock.
-    ctx.resume().then(run).catch(() => {});
-  } else {
-    run();
-  }
-
-  if (!keySoundsLoading && !keySoundBuffers.some((b) => b !== null)) {
-    void loadKeySounds(ctx);
-  }
+  const state = ctx.state as string;
+  const resume =
+    state === "suspended" || state === "interrupted"
+      ? ctx.resume()
+      : Promise.resolve();
+  // Do not drop the first click while resuming after browser autoplay lock.
+  void resume.then(run).catch(() => {});
 }
 
 function Keycap({
@@ -688,6 +696,15 @@ function Keyboard({ mobile }: { mobile: boolean }) {
 
   useEffect(() => {
     if (ref.current) ref.current.rotation.order = "YXZ";
+  }, []);
+
+  useEffect(() => {
+    // Install before the first R3F pointer event so autoplay unlocking runs in
+    // the browser's native capture phase. Pre-decoding also removes the
+    // silent delay on the first key interaction.
+    installAudioUnlock();
+    const ctx = getAudioContext();
+    if (ctx) void loadKeySounds(ctx);
   }, []);
 
   useFrame((state, delta) => {

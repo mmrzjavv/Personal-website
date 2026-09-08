@@ -900,10 +900,10 @@ export default function FrozenKeyboard({
       // off-axis desktop composition.
       camera={
         mobile
-          ? { position: [0, 1.45, 9.2], fov: 29 }
+          ? { position: [0, 1.2, 7.1], fov: 24 }
           : { position: [1.5, 3.6, 11], fov: 22 }
       }
-      dpr={mobile ? [1, 1.6] : [1, 1.25]}
+      dpr={mobile ? [1, 1.75] : [1, 1.25]}
       gl={{
         antialias: true,
         alpha: true,

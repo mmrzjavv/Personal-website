@@ -217,11 +217,13 @@ export default function Home() {
                   {t("hero.hire")}
                 </button>
                 <div className="basis-full h-0 md:hidden" aria-hidden />
-                <a href={`mailto:${EMAIL}`} data-cursor="hover" data-magnetic className="frost-icon" aria-label="Email">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></svg>
-                </a>
-                <a href={LINKEDIN} target="_blank" rel="noopener noreferrer" data-cursor="hover" data-magnetic className="frost-icon text-[11px] font-bold" aria-label="LinkedIn">in</a>
-                <a href="/Mohammadreza-Javaheri-cv.pdf" target="_blank" rel="noopener noreferrer" data-cursor="hover" data-magnetic className="frost-icon text-[10px] font-bold" aria-label="CV">CV</a>
+                <div className="hero-contact-links" aria-label={t("contact.title")}>
+                  <a href={`mailto:${EMAIL}`} data-cursor="hover" data-magnetic className="frost-icon" aria-label="Email">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></svg>
+                  </a>
+                  <a href={LINKEDIN} target="_blank" rel="noopener noreferrer" data-cursor="hover" data-magnetic className="frost-icon text-[11px] font-bold" aria-label="LinkedIn">in</a>
+                  <a href="/Mohammadreza-Javaheri-cv.pdf" target="_blank" rel="noopener noreferrer" data-cursor="hover" data-magnetic className="frost-icon text-[10px] font-bold" aria-label="CV">CV</a>
+                </div>
               </div>
             </div>
 
@@ -237,16 +239,20 @@ export default function Home() {
                 <Reveal><h2 className="text-5xl sm:text-7xl md:text-8xl font-bold tracking-[-0.03em] text-ice-50 leading-[0.95]">{t("stack.title")}</h2></Reveal>
                 <Reveal delay={120}><p className="mt-3 text-sm sm:text-base text-ice-400"><span className="hidden md:inline">{t("stack.hint")}</span><span className="md:hidden">{t("stack.hintMobile")}</span></p></Reveal>
               </div>
-              {isMobile && (
-                <div className="md:hidden mt-10 grid grid-cols-1 sm:grid-cols-2 gap-3 pointer-events-auto">
-                  {SKILLS_FLAT.map((s) => (
-                    <div key={s.slug} className="flex items-start gap-3 rounded-xl bg-ink-1/70 backdrop-blur-sm border border-ink-3 p-4">
-                      <svg viewBox="0 0 24 24" width="22" height="22" fill={`#${s.hex}`} className="flex-none mt-0.5" aria-hidden><path d={s.path} /></svg>
-                      <div><p className="text-ice-50 font-medium text-sm">{s.title}</p><p className="text-ice-400 text-xs mt-0.5 leading-snug">{t(`keyboard.taglines.${s.slug}`)}</p></div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div className="stack-skill-grid pointer-events-auto">
+                {SKILLS_FLAT.map((s, index) => (
+                  <article key={s.slug} className="stack-skill-card">
+                    <span className="stack-skill-card__number" aria-hidden>{String(index + 1).padStart(2, "0")}</span>
+                    <span className="stack-skill-card__icon" aria-hidden>
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill={`#${s.hex}`}><path d={s.path} /></svg>
+                    </span>
+                    <span className="stack-skill-card__copy">
+                      <span className="stack-skill-card__title">{s.title}</span>
+                      <span className="stack-skill-card__tagline">{t(`keyboard.taglines.${s.slug}`)}</span>
+                    </span>
+                  </article>
+                ))}
+              </div>
             </div>
           </section>
 
@@ -328,22 +334,22 @@ export default function Home() {
           </section>
 
           <section data-kb-section="contact" className="relative py-24 md:min-h-screen flex flex-col justify-center p-6 sm:p-10 md:p-14 overflow-hidden">
-            <div className="max-w-xl relative">
+            <div className="contact-panel relative">
               <Reveal><p className="font-mono text-sm text-ice-400 mb-3">{t("contact.kicker")}</p></Reveal>
               <Reveal delay={80}><h2 className="text-4xl sm:text-6xl font-semibold tracking-tight text-ice-50 mb-6">{t("contact.title")}</h2></Reveal>
               <Reveal delay={160}><p className="text-ice-200 mb-10">{t("contact.body")}</p></Reveal>
               <Reveal delay={240}>
-                <div className="flex flex-wrap gap-3 pointer-events-auto">
-                  <CopyEmail email={EMAIL} className="frost-btn frost-btn--primary"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></svg>{t("contact.copyEmail")}</CopyEmail>
-                  <a href={`mailto:${EMAIL}`} data-cursor="hover" className="frost-btn">{t("contact.openMail")}</a>
+                <div className="contact-actions pointer-events-auto">
+                  <CopyEmail email={EMAIL} className="frost-btn frost-btn--primary contact-action"><span className="contact-action__icon"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></svg></span><span>{t("contact.copyEmail")}</span></CopyEmail>
+                  <a href={`mailto:${EMAIL}`} data-cursor="hover" className="frost-btn contact-action"><span className="contact-action__icon"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" /><path d="m22 6-10 7L2 6" /></svg></span><span>{t("contact.openMail")}</span></a>
                   {PHONE_NUMBERS.map((phone) => (
-                    <a key={phone} href={`tel:${phone}`} dir="ltr" data-cursor="hover" className="frost-btn" aria-label={`${t("contact.call")} ${phone}`}>
-                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.78.62 2.63a2 2 0 0 1-.45 2.11L8 9.73a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.85.29 1.73.5 2.63.62A2 2 0 0 1 22 16.92z" /></svg>
-                      {phone}
+                    <a key={phone} href={`tel:${phone}`} dir="ltr" data-cursor="hover" className="frost-btn contact-action contact-action--phone" aria-label={`${t("contact.call")} ${phone}`}>
+                      <span className="contact-action__icon"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.78.62 2.63a2 2 0 0 1-.45 2.11L8 9.73a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.85.29 1.73.5 2.63.62A2 2 0 0 1 22 16.92z" /></svg></span>
+                      <span className="contact-action__copy"><span className="contact-action__label">{t("contact.call")}</span><span className="contact-action__value">{phone}</span></span>
                     </a>
                   ))}
-                  <a href="/Mohammadreza-Javaheri-cv.pdf" target="_blank" rel="noopener noreferrer" data-cursor="hover" className="frost-btn">CV</a>
-                  <a href={LINKEDIN} target="_blank" rel="noopener noreferrer" data-cursor="hover" className="frost-btn">{t("contact.linkedin")}</a>
+                  <a href="/Mohammadreza-Javaheri-cv.pdf" target="_blank" rel="noopener noreferrer" data-cursor="hover" className="frost-btn contact-action"><span className="contact-action__icon"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5" /></svg></span><span>CV</span></a>
+                  <a href={LINKEDIN} target="_blank" rel="noopener noreferrer" data-cursor="hover" className="frost-btn contact-action"><span className="contact-action__icon contact-action__icon--linkedin">in</span><span>{t("contact.linkedin")}</span></a>
                 </div>
               </Reveal>
             </div>

@@ -181,7 +181,16 @@ def _image_url(row: dict[str, Any], storage: ObjectStorage | None) -> str:
 
 
 def _to_project(row: dict[str, Any], images: Iterable[dict[str, Any]], storage: ObjectStorage | None) -> dict[str, Any]:
-    media = [url for url in (_image_url(image, storage) for image in images) if url]
+    media_items = []
+    for image in images:
+        url = _image_url(image, storage)
+        if url:
+            media_items.append({
+                "id": image["id"],
+                "url": url,
+                "alt": image.get("alt_text", ""),
+            })
+    media = [item["url"] for item in media_items]
     return {
         "id": row["id"],
         "slug": row["slug"],
@@ -198,6 +207,7 @@ def _to_project(row: dict[str, Any], images: Iterable[dict[str, Any]], storage: 
         },
         "url": row["project_url"],
         "media": media,
+        "mediaItems": media_items,
         "highlights": row["highlights"] or [],
         "align": row["align"],
         "section": row["section"],
@@ -384,4 +394,58 @@ def delete_project(settings: Settings, project_id: int) -> list[str] | None:
         ).fetchone()
         if not deleted:
             return None
+        remaining = connection.execute(
+            "SELECT id FROM portfolio_projects ORDER BY sort_order ASC, id ASC"
+        ).fetchall()
+        for order, project in enumerate(remaining):
+            connection.execute(
+                "UPDATE portfolio_projects SET sort_order = %s, num = %s WHERE id = %s",
+                (order, order + 1, project["id"]),
+            )
         return [image["object_key"] for image in images]
+
+
+def reorder_projects(settings: Settings, project_ids: list[int]) -> None:
+    with connect(settings) as connection:
+        current = connection.execute(
+            "SELECT id FROM portfolio_projects ORDER BY sort_order ASC, id ASC"
+        ).fetchall()
+        current_ids = [project["id"] for project in current]
+        if len(project_ids) != len(set(project_ids)) or set(project_ids) != set(current_ids):
+            raise ValueError("ترتیب پروژه‌ها کامل یا معتبر نیست")
+        for order, project_id in enumerate(project_ids):
+            connection.execute(
+                "UPDATE portfolio_projects SET sort_order = %s, num = %s, updated_at = now() WHERE id = %s",
+                (order, order + 1, project_id),
+            )
+
+
+def reorder_images(settings: Settings, project_id: int, image_ids: list[int]) -> None:
+    with connect(settings) as connection:
+        current = connection.execute(
+            "SELECT id FROM portfolio_project_images WHERE project_id = %s ORDER BY sort_order ASC, id ASC",
+            (project_id,),
+        ).fetchall()
+        current_ids = [image["id"] for image in current]
+        if len(image_ids) != len(set(image_ids)) or set(image_ids) != set(current_ids):
+            raise ValueError("ترتیب تصاویر کامل یا معتبر نیست")
+        for order, image_id in enumerate(image_ids):
+            connection.execute(
+                "UPDATE portfolio_project_images SET sort_order = %s WHERE id = %s AND project_id = %s",
+                (order, image_id, project_id),
+            )
+
+
+def delete_image(settings: Settings, project_id: int, image_id: int) -> str | None:
+    with connect(settings) as connection:
+        image = connection.execute(
+            "SELECT object_key FROM portfolio_project_images WHERE id = %s AND project_id = %s",
+            (image_id, project_id),
+        ).fetchone()
+        if not image:
+            return None
+        connection.execute(
+            "DELETE FROM portfolio_project_images WHERE id = %s AND project_id = %s",
+            (image_id, project_id),
+        )
+        return image["object_key"] or ""

@@ -8,9 +8,19 @@ from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
-from pydantic import HttpUrl
+from pydantic import BaseModel, HttpUrl
 
-from .database import create_project, delete_project, get_project, init_schema, list_projects, update_project
+from .database import (
+    create_project,
+    delete_image,
+    delete_project,
+    get_project,
+    init_schema,
+    list_projects,
+    reorder_images,
+    reorder_projects,
+    update_project,
+)
 from .settings import Settings, get_settings
 from .storage import ObjectStorage
 
@@ -36,6 +46,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+class ProjectOrderPayload(BaseModel):
+    project_ids: list[int]
+
+
+class ImageOrderPayload(BaseModel):
+    image_ids: list[int]
 
 
 def require_admin(x_admin_token: str | None = Header(default=None)) -> None:
@@ -81,6 +99,15 @@ def project_media(object_key: str) -> Response:
 
 @app.get("/api/admin/projects", dependencies=[Depends(require_admin)])
 def admin_projects() -> list[dict]:
+    return list_projects(settings, storage, published_only=False)
+
+
+@app.patch("/api/admin/projects/reorder", dependencies=[Depends(require_admin)])
+def reorder_admin_projects(payload: ProjectOrderPayload) -> list[dict]:
+    try:
+        reorder_projects(settings, payload.project_ids)
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
     return list_projects(settings, storage, published_only=False)
 
 
@@ -214,3 +241,25 @@ async def edit_project(
             except Exception:
                 logger.warning("Could not delete replaced MinIO object %s", object_key)
     return project
+
+
+@app.patch("/api/admin/projects/{project_id}/images", dependencies=[Depends(require_admin)])
+def reorder_admin_images(project_id: int, payload: ImageOrderPayload) -> dict[str, bool]:
+    try:
+        reorder_images(settings, project_id, payload.image_ids)
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    return {"updated": True}
+
+
+@app.delete("/api/admin/projects/{project_id}/images/{image_id}", dependencies=[Depends(require_admin)])
+def remove_admin_image(project_id: int, image_id: int) -> dict[str, bool]:
+    object_key = delete_image(settings, project_id, image_id)
+    if object_key is None:
+        raise HTTPException(status_code=404, detail="تصویر پیدا نشد")
+    if storage and object_key:
+        try:
+            storage.delete(object_key)
+        except Exception:
+            logger.warning("Could not delete MinIO object %s", object_key)
+    return {"deleted": True}

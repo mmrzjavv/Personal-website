@@ -35,3 +35,20 @@ export async function PUT(
     return Response.json({ error: "Content API is unavailable" }, { status: 503 });
   }
 }
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
+  try {
+    const response = await fetch(`${getBackendUrl()}/api/admin/projects/${encodeURIComponent(id)}/images`, {
+      method: "PATCH",
+      headers: { ...adminHeaders(request), "content-type": "application/json" },
+      body: await request.text(),
+    });
+    return jsonResponse(response);
+  } catch {
+    return Response.json({ error: "Content API is unavailable" }, { status: 503 });
+  }
+}

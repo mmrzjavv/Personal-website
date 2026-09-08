@@ -1,10 +1,10 @@
 import {
-  siAnthropic,
   siApachekafka,
   siDocker,
   siGit,
-  siHuggingface,
+  siJavascript,
   siLangchain,
+  siNodedotjs,
   siNextdotjs,
   siOpenrouter,
   siPostgresql,
@@ -23,13 +23,13 @@ export type SkillIcon = {
   hex: string;
 };
 
-// The keyboard is the portfolio's signature: the first two rows cover the
-// full-stack/backend foundation, while the last row makes the AI/LLM/RAG
-// direction explicit without adding a separate generic skills wall.
+// The keyboard is the portfolio's signature: the first row reflects the
+// backend/distributed-systems work in the CV, the second keeps the full-stack
+// foundation visible, and the last row represents the AI/LLM direction.
 export const SKILLS_GRID: readonly (readonly SkillIcon[])[] = [
-  [siReact, siNextdotjs, siTypescript, siDotnet, siPython],
-  [siPostgresql, siRedis, siApachekafka, siOpenrouter, siAnthropic],
-  [siLangchain, siHuggingface, siDocker, siGit, siTailwindcss],
+  [siDotnet, siPostgresql, siApachekafka, siRedis, siPython],
+  [siReact, siNextdotjs, siTypescript, siDocker, siGit],
+  [siLangchain, siOpenrouter, siNodedotjs, siJavascript, siTailwindcss],
 ] as const;
 
 export const SKILLS_FLAT: readonly SkillIcon[] = SKILLS_GRID.flat();

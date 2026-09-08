@@ -123,9 +123,7 @@ export const DICT = {
       redis: { fa: "سرعت، درست جایی که مهم است.", en: "Speed where it matters." },
       apachekafka: { fa: "رویدادهایی که سیستم را در حرکت نگه می‌دارند.", en: "Events that keep systems moving." },
       openrouter: { fa: "مدل‌های هوش مصنوعی در محصولات واقعی.", en: "AI models integrated into real products." },
-      anthropic: { fa: "تبدیل context به action.", en: "Models that turn context into action." },
       langchain: { fa: "ارکستراسیون LLMها با هدف مشخص.", en: "Orchestrating LLMs with intent." },
-      huggingface: { fa: "مدل‌های باز برای تجربه‌های بهتر.", en: "Open models for better experiments." },
     },
   },
 } as const satisfies Record<string, Node>;

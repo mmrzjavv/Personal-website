@@ -1,17 +1,15 @@
 import {
   siApachekafka,
+  siDiagramsdotnet,
   siDocker,
-  siGit,
-  siJavascript,
   siLangchain,
-  siNodedotjs,
   siNextdotjs,
-  siOpenrouter,
   siPostgresql,
   siPython,
   siReact,
   siRedis,
-  siTailwindcss,
+  siRsocket,
+  siSqlalchemy,
   siTypescript,
   siDotnet,
 } from "simple-icons";
@@ -23,13 +21,30 @@ export type SkillIcon = {
   hex: string;
 };
 
+function skillVariant(base: SkillIcon, title: string, slug: string): SkillIcon {
+  return { ...base, title, slug };
+}
+
 // The keyboard is the portfolio's signature: the first row reflects the
-// backend/distributed-systems work in the CV, the second keeps the full-stack
-// foundation visible, and the last row represents the AI/LLM direction.
+// backend/distributed-systems work in the CV, the second captures the
+// architecture and real-time patterns, and the last row keeps the full-stack
+// plus AI/LLM direction visible.
 export const SKILLS_GRID: readonly (readonly SkillIcon[])[] = [
-  [siDotnet, siPostgresql, siApachekafka, siRedis, siPython],
-  [siReact, siNextdotjs, siTypescript, siDocker, siGit],
-  [siLangchain, siOpenrouter, siNodedotjs, siJavascript, siTailwindcss],
+  [
+    skillVariant(siDotnet, "C# / .NET", "dotnet"),
+    siPostgresql,
+    siApachekafka,
+    siRedis,
+    siDocker,
+  ],
+  [
+    skillVariant(siRsocket, "SignalR / WebSockets", "signalr-websockets"),
+    skillVariant(siDiagramsdotnet, "CQRS", "cqrs"),
+    skillVariant(siDiagramsdotnet, "Clean Architecture", "clean-architecture"),
+    skillVariant(siDiagramsdotnet, "Domain-Driven Design", "ddd"),
+    skillVariant(siSqlalchemy, "SQL / EF Core / Dapper", "data-access"),
+  ],
+  [siReact, siNextdotjs, siTypescript, siPython, skillVariant(siLangchain, "LLM / RAG", "llm-rag")],
 ] as const;
 
 export const SKILLS_FLAT: readonly SkillIcon[] = SKILLS_GRID.flat();

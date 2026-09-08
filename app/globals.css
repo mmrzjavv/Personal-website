@@ -472,6 +472,8 @@ html[dir="rtl"] .projects-scroll-hint__arrow {
 /* The stack is a readable desktop companion to the 3D keyboard. It remains
    deliberately quiet so the keyboard keeps the visual lead. */
 .stack-skill-grid {
+  position: relative;
+  z-index: 2;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0.75rem;
@@ -494,6 +496,17 @@ html[dir="rtl"] .projects-scroll-hint__arrow {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   transition: transform 220ms ease, border-color 220ms ease, background 220ms ease;
+}
+.stack-heading {
+  position: relative;
+  z-index: 3;
+  width: min(100%, 72rem);
+  margin-inline: auto;
+  padding: 0.8rem 1rem 1.5rem;
+  border-radius: 1.5rem;
+  background: linear-gradient(180deg, rgba(5, 11, 22, 0.72), rgba(5, 11, 22, 0.45) 72%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 .stack-skill-card:hover {
   transform: translateY(-3px);
@@ -1261,6 +1274,10 @@ html[dir="rtl"] .contact-action__value {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.6rem;
     margin-top: 2rem;
+  }
+  .stack-heading {
+    padding: 0.35rem 0.4rem 1rem;
+    border-radius: 1rem;
   }
   .stack-skill-card {
     grid-template-columns: 1.55rem 2rem minmax(0, 1fr);

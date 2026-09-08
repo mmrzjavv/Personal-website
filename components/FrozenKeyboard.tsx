@@ -45,16 +45,16 @@ const SECTION_STATES: Record<string, KeyboardState> = {
     scale: 1,
   },
   stack: {
-    // Naresh's reference: keyboard lives in the lower-right, moderate
-    // isometric tilt — enough yaw to show the left face but not so much
-    // pitch that the base wall takes over the silhouette.
+    // Keep the keyboard clearly below the skill cards. The stack section is
+    // intentionally a two-layer composition: the cards remain readable in
+    // front while the keyboard enters the lower half with breathing room.
     yaw: Math.PI * 0.40,
     pitch: Math.PI * 0.14,
     roll: -Math.PI * -0.13,
     posX: 0,
-    posY: -0.6,
+    posY: -1.35,
     posZ: 0,
-    scale: 1.3,
+    scale: 1.22,
   },
   // Project 1 — text is left-aligned, so the keyboard slides to the RIGHT,
   // near the giant "01" watermark.

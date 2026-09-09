@@ -235,7 +235,7 @@ export default function Home() {
 
           <section data-kb-section="stack" className="relative md:min-h-[160vh] p-6 sm:p-10 md:p-14">
             <div className="relative md:h-[125vh]">
-              <div className="stack-heading md:sticky md:top-28 text-center">
+              <div className="md:sticky md:top-28 text-center">
                 <Reveal><h2 className="text-5xl sm:text-7xl md:text-8xl font-bold tracking-[-0.03em] text-ice-50 leading-[0.95]">{t("stack.title")}</h2></Reveal>
                 <Reveal delay={120}><p className="mt-3 text-sm sm:text-base text-ice-400"><span className="hidden md:inline">{t("stack.hint")}</span><span className="md:hidden">{t("stack.hintMobile")}</span></p></Reveal>
               </div>

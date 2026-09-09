@@ -842,6 +842,8 @@ html[dir="rtl"] .contact-action__value {
   grid-template-columns: minmax(0, 1.35fr) minmax(17rem, 0.85fr);
   grid-template-rows: auto minmax(0, 1fr);
   height: clamp(34rem, 46vw, 40rem);
+  min-height: 0;
+  box-sizing: border-box;
   align-items: stretch;
   gap: clamp(1.25rem, 4vw, 4.5rem);
   padding: clamp(0.75rem, 2vw, 1.25rem);
@@ -891,6 +893,7 @@ html[dir="rtl"] .contact-action__value {
 .project-card__visual {
   position: relative;
   min-width: 0;
+  min-height: 0;
   display: flex;
   align-items: center;
   transform: translateZ(18px);
@@ -1060,6 +1063,7 @@ html[dir="rtl"] .contact-action__value {
   z-index: 1;
   display: flex;
   min-width: 0;
+  min-height: 0;
   flex-direction: column;
   justify-content: center;
   padding: clamp(1rem, 2.5vw, 2.25rem);
@@ -1110,6 +1114,52 @@ html[dir="rtl"] .contact-action__value {
   transition: color 200ms ease;
 }
 .project-card__footnote a:hover { color: var(--ice-50); }
+
+/* Keep every project card visually stable even when a project title or
+   description is longer than the others. The card owns the rhythm; copy is
+   allowed to wrap inside it, never to resize the showcase unexpectedly. */
+.project-card__title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.project-card__content > p {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+@media (min-width: 768px) and (max-width: 1100px) {
+  .project-card {
+    grid-template-columns: minmax(0, 1.08fr) minmax(15rem, 0.92fr);
+    gap: 1.25rem;
+    height: clamp(32rem, 72vw, 38rem);
+  }
+  .project-card__content {
+    padding: 1.25rem;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 900px) {
+  .project-card {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto minmax(24rem, 1fr);
+    height: auto;
+    min-height: 44rem;
+  }
+  .project-card--left .project-card__visual,
+  .project-card--right .project-card__visual {
+    order: 1;
+  }
+  .project-card--left .project-card__content,
+  .project-card--right .project-card__content {
+    order: 2;
+    min-height: 24rem;
+    justify-content: flex-start;
+  }
+}
 
 /* Short laptop viewports, including most 13-inch displays. Keep the 3D
    composition but make the content fit the first viewport more naturally. */
@@ -1337,9 +1387,19 @@ html[dir="rtl"] .contact-action__value {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto;
     height: auto;
-    min-height: 0;
+    min-height: clamp(38rem, 108svh, 48rem);
     gap: 0;
     padding: 0.6rem;
+  }
+  .project-card--left .project-card__visual,
+  .project-card--right .project-card__visual {
+    order: 1;
+  }
+  .project-card--left .project-card__content,
+  .project-card--right .project-card__content {
+    order: 2;
+    min-height: 24rem;
+    justify-content: flex-start;
   }
   .project-card--right .project-card__visual,
   .project-card--right .project-card__content {
@@ -1740,8 +1800,78 @@ html[dir="rtl"] .contact-action__value {
 .project-modal__body {
   padding: 1.75rem 1.75rem 2.5rem;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   flex: 1;
   min-height: 0;
+}
+
+/* Project details are a contained reading surface. On tablets the media and
+   copy share the viewport comfortably; on phones it becomes a bottom-sheet
+   style panel with its own scroll area and full-width actions. */
+.project-modal__actions .frost-btn {
+  flex: 0 1 auto;
+}
+
+@media (max-width: 900px) {
+  .project-modal {
+    padding: 0.75rem;
+  }
+  .project-modal__dialog {
+    max-height: calc(100dvh - 1.5rem);
+    border-radius: 1rem;
+  }
+  .project-modal__media {
+    aspect-ratio: 16 / 10;
+  }
+  .project-modal__body {
+    padding: 1.25rem 1.15rem 1.5rem;
+  }
+  .project-modal__actions .frost-btn {
+    flex: 1 1 12rem;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .project-modal {
+    align-items: flex-end;
+    padding: 0.5rem;
+  }
+  .project-modal__dialog {
+    width: 100%;
+    max-height: calc(100dvh - 1rem);
+    border-radius: 1.15rem 1.15rem 0.85rem 0.85rem;
+  }
+  .project-modal__close {
+    top: 0.55rem;
+    right: 0.55rem;
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  .project-modal__media {
+    height: min(42dvh, 22rem);
+    aspect-ratio: auto;
+  }
+  .project-modal__body {
+    padding: 1.1rem 0.9rem 1.25rem;
+  }
+  .project-modal__body h3 {
+    max-width: calc(100% - 2rem);
+    font-size: clamp(1.45rem, 7vw, 2rem);
+    line-height: 1.15;
+  }
+  .project-modal__body > p {
+    font-size: 0.92rem;
+    line-height: 1.75;
+  }
+  .project-modal__actions {
+    gap: 0.55rem;
+  }
+  .project-modal__actions .frost-btn {
+    flex-basis: 100%;
+    min-height: 2.85rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

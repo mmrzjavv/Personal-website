@@ -128,7 +128,7 @@ export default function ProjectModal({ project, onClose }: Props) {
               </p>
 
               {(project.url || project.github) && (
-                <div className="flex flex-wrap gap-3 mb-6">
+                <div className="project-modal__actions flex flex-wrap gap-3 mb-6">
                   {project.url && (
                     <a
                       href={project.url}

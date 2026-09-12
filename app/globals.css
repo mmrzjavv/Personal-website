@@ -839,9 +839,9 @@ html[dir="rtl"] .contact-action__value {
 .project-card {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(17rem, 0.85fr);
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.85fr);
   grid-template-rows: auto minmax(0, 1fr);
-  height: clamp(34rem, 46vw, 40rem);
+  height: auto;
   min-height: 0;
   box-sizing: border-box;
   align-items: stretch;
@@ -1133,9 +1133,9 @@ html[dir="rtl"] .contact-action__value {
 
 @media (min-width: 768px) and (max-width: 1100px) {
   .project-card {
-    grid-template-columns: minmax(0, 1.08fr) minmax(15rem, 0.92fr);
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
     gap: 1.25rem;
-    height: clamp(32rem, 72vw, 38rem);
+    height: auto;
   }
   .project-card__content {
     padding: 1.25rem;
@@ -1190,7 +1190,7 @@ html[dir="rtl"] .contact-action__value {
     margin-bottom: 0.65rem;
   }
   .project-card {
-    height: clamp(31rem, 70vh, 38rem);
+    height: auto;
     gap: clamp(1rem, 2.5vw, 2.5rem);
   }
   .project-card__content {

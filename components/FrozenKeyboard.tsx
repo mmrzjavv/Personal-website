@@ -4,11 +4,8 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import {
   Environment,
   Lightformer,
-  Text,
-  Text3D,
 } from "@react-three/drei";
 import {
-  Suspense,
   useCallback,
   useEffect,
   useMemo,
@@ -18,7 +15,12 @@ import {
 import { useSeason } from "@/components/SeasonProvider";
 import { useLanguage } from "@/components/LanguageProvider";
 import * as THREE from "three";
-import { SKILLS_GRID, type SkillIcon } from "@/lib/skills";
+import {
+  SKILL_FOCUS_EVENT,
+  SKILL_HOVER_EVENT,
+  SKILLS_GRID,
+  type SkillIcon,
+} from "@/lib/skills";
 
 // Per-section keyboard "states" — same idea as Naresh's animated-background-
 // config.ts, but for our R3F keyboard. Values are tweened toward via lerp
@@ -45,59 +47,20 @@ const SECTION_STATES: Record<string, KeyboardState> = {
     scale: 1,
   },
   stack: {
-    // Naresh's reference: keyboard lives in the lower-right, moderate
-    // isometric tilt — enough yaw to show the left face but not so much
-    // pitch that the base wall takes over the silhouette.
-    yaw: Math.PI * 0.40,
-    pitch: Math.PI * 0.14,
-    roll: -Math.PI * -0.13,
-    posX: 0,
-    posY: -0.6,
+    yaw: Math.PI * 0.2,
+    pitch: Math.PI * 0.1,
+    roll: 0.04,
+    posX: 2.6,
+    posY: 0.1,
     posZ: 0,
-    scale: 1.3,
+    scale: 1.05,
   },
-  // Project 1 — text is left-aligned, so the keyboard slides to the RIGHT,
-  // near the giant "01" watermark.
-  project1: {
-    yaw: 0,
-    pitch: 0.7,
-    roll: 0.2,
-    posX: 1.5,
-    posY: 0.2,
-    posZ: 0,
-    scale: 0.85,
-  },
-  // All project scenes share one composition so the carousel does not flip
-  // direction between cards.
-  project2: {
-    yaw: 0,
-    pitch: 0.7,
-    roll: 0.2,
-    posX: 1.5,
-    posY: 0.2,
-    posZ: 0,
-    scale: 0.85,
-  },
-  // Project 3 — left-aligned again, keyboard right.
-  project3: {
-    yaw: 0,
-    pitch: 0.7,
-    roll: 0.2,
-    posX: 1.5,
-    posY: 0.2,
-    posZ: 0,
-    scale: 0.85,
-  },
-  // Project 4 follows the same composition too.
-  project4: {
-    yaw: 0,
-    pitch: 0.7,
-    roll: 0.2,
-    posX: 1.5,
-    posY: 0.2,
-    posZ: 0,
-    scale: 0.85,
-  },
+  // Keep keyboard off-canvas while browsing projects.
+  project1: { yaw: 0, pitch: 0, roll: 0, posX: 10, posY: 6, posZ: -8, scale: 0.01 },
+  project2: { yaw: 0, pitch: 0, roll: 0, posX: 10, posY: 6, posZ: -8, scale: 0.01 },
+  project3: { yaw: 0, pitch: 0, roll: 0, posX: 10, posY: 6, posZ: -8, scale: 0.01 },
+  project4: { yaw: 0, pitch: 0, roll: 0, posX: 10, posY: 6, posZ: -8, scale: 0.01 },
+  project5: { yaw: 0, pitch: 0, roll: 0, posX: 10, posY: 6, posZ: -8, scale: 0.01 },
   experience: {
     yaw: Math.PI * 0.3,
     pitch: Math.PI * 0.08,
@@ -300,10 +263,6 @@ const BASE_HEIGHT = 0.26;
 const ICON_PLANE_SIZE = KEYCAP_SIZE * KEYCAP_TOP_SCALE * 0.78;
 const PRESS_DEPTH = 0.15;
 
-// Mechanical keyboard "tock" samples plus a tiny synthesized fallback. Keep
-// one AudioContext per tab. The context and samples are prepared when the
-// keyboard mounts, while a capture-phase listener unlocks/resumes the context
-// before React Three Fiber receives the first real click or keydown.
 let audioCtx: AudioContext | null = null;
 let audioUnlockInstalled = false;
 
@@ -329,32 +288,20 @@ function installAudioUnlock() {
     if (state === "suspended" || state === "interrupted") {
       void ctx.resume().catch(() => {});
     }
-    // Decode as soon as the browser gives us a legitimate interaction. The
-    // promise is shared, so repeated key presses never start duplicate fetches.
     void loadKeySounds(ctx);
   };
-  window.addEventListener("pointerdown", unlock, {
-    capture: true,
-    passive: true,
-  });
-  window.addEventListener("keydown", unlock, {
-    capture: true,
-    passive: true,
-  });
-  window.addEventListener("touchstart", unlock, {
-    capture: true,
-    passive: true,
-  });
+  window.addEventListener("pointerdown", unlock, { capture: true, passive: true });
+  window.addEventListener("keydown", unlock, { capture: true, passive: true });
+  window.addEventListener("touchstart", unlock, { capture: true, passive: true });
 }
-// Two pre-decoded samples (press / release) — pick one at random on each
-// hover for variety. Fetched + decoded once on first play; subsequent hovers
-// just spawn a fresh BufferSource (cheap, can overlap).
+
 const KEY_SOUND_URLS = [
   "/sounds/switch_press.mp3",
   "/sounds/switch_release.mp3",
 ] as const;
 const keySoundBuffers: (AudioBuffer | null)[] = [null, null];
 let keySoundsLoading: Promise<void> | null = null;
+
 function loadKeySounds(ctx: AudioContext): Promise<void> {
   if (keySoundsLoading) return keySoundsLoading;
   keySoundsLoading = Promise.all(
@@ -365,9 +312,7 @@ function loadKeySounds(ctx: AudioContext): Promise<void> {
         .then((decoded) => {
           keySoundBuffers[i] = decoded;
         })
-        .catch(() => {
-          /* keep null; playKeyClick will pick the other sample */
-        })
+        .catch(() => {})
     )
   ).then(() => undefined);
   return keySoundsLoading;
@@ -382,7 +327,7 @@ function playSynthKeyClick(ctx: AudioContext, seed: number) {
   oscillator.frequency.setValueAtTime(frequency, now);
   oscillator.frequency.exponentialRampToValueAtTime(420, now + 0.045);
   gain.gain.setValueAtTime(0.0001, now);
-  gain.gain.exponentialRampToValueAtTime(0.16, now + 0.002);
+  gain.gain.exponentialRampToValueAtTime(0.12, now + 0.002);
   gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.055);
   oscillator.connect(gain);
   gain.connect(ctx.destination);
@@ -401,20 +346,17 @@ function playKeyClick(seed = 0) {
       (b): b is AudioBuffer => b !== null
     );
     if (available.length === 0) {
-      // The first hover can happen while the MP3 files are still loading.
-      // Use a tiny local fallback so that interaction never feels silent.
       playSynthKeyClick(ctx, seed);
       return;
     }
     const buffer = available[Math.floor(Math.random() * available.length)];
-    // Per-key playback rate detune (±4%) keeps repeated presses lively.
     const detune =
       1 + (((seed * 9301 + 49297) % 233280) / 233280 - 0.5) * 0.08;
     const src = ctx.createBufferSource();
     src.buffer = buffer;
     src.playbackRate.value = detune;
     const gain = ctx.createGain();
-    gain.gain.value = 0.7;
+    gain.gain.value = 0.55;
     src.connect(gain);
     gain.connect(ctx.destination);
     src.start();
@@ -433,7 +375,6 @@ function playKeyClick(seed = 0) {
     state === "suspended" || state === "interrupted"
       ? ctx.resume()
       : Promise.resolve();
-  // Do not drop the first click while resuming after browser autoplay lock.
   void resume.then(run).catch(() => {});
 }
 
@@ -601,9 +542,6 @@ function Keycap({
   );
   const handleOut = useCallback(() => onHoverChange(false), [onHoverChange]);
 
-  // Touch devices never fire hover, so pointer down drives the same press +
-  // SFX path on mobile and also guarantees a sound for an explicit desktop
-  // click when the pointer entered a key too quickly to emit hover events.
   const handleDown = useCallback(
     (e: { stopPropagation: () => void }) => {
       e.stopPropagation();
@@ -658,9 +596,10 @@ function Keyboard({ mobile }: { mobile: boolean }) {
   const ref = useRef<THREE.Group>(null);
   const isMobile = mobile;
   const { palette } = useSeason();
-  const { lang, t } = useLanguage();
+  const { lang } = useLanguage();
   const [activeSection, activeSectionRef, highlightsRef] = useActiveSection();
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
+  const [focusedSlug, setFocusedSlug] = useState<string | null>(null);
   // Mutable holders for the smoothed target — kept off React state so
   // useFrame can read them every tick without triggering re-renders.
   const current = useRef<KeyboardState>({ ...SECTION_STATES.hero });
@@ -684,6 +623,40 @@ function Keyboard({ mobile }: { mobile: boolean }) {
     spinRef.current += Math.PI * 2 * dir;
   }, [activeSection, mobile]);
 
+  // DOM skill chips can focus a keycap — keep the 3D highlight in sync.
+  useEffect(() => {
+    const onFocus = (event: Event) => {
+      const detail = (event as CustomEvent<{ slug: string | null }>).detail;
+      setFocusedSlug(detail?.slug ?? null);
+    };
+    window.addEventListener(SKILL_FOCUS_EVENT, onFocus as EventListener);
+    return () => window.removeEventListener(SKILL_FOCUS_EVENT, onFocus as EventListener);
+  }, []);
+
+  const hoveredIcon = useMemo(() => {
+    if (hoveredKey) {
+      const [r, c] = hoveredKey.split("-").map(Number);
+      return SKILLS[r]?.[c] ?? null;
+    }
+    if (focusedSlug) {
+      for (const row of SKILLS) {
+        const match = row.find((skill) => skill.slug === focusedSlug);
+        if (match) return match;
+      }
+    }
+    return null;
+  }, [hoveredKey, focusedSlug]);
+
+  // Broadcast hovered/focused skill so the stack panel can mirror it.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.dispatchEvent(
+      new CustomEvent(SKILL_HOVER_EVENT, {
+        detail: { slug: hoveredIcon?.slug ?? null },
+      })
+    );
+  }, [hoveredIcon]);
+
   // Drive the global cursor from the single Keyboard instance. The sound is
   // triggered directly by each key's pointer event so React state batching
   // cannot swallow rapid moves between adjacent keys.
@@ -699,9 +672,6 @@ function Keyboard({ mobile }: { mobile: boolean }) {
   }, []);
 
   useEffect(() => {
-    // Install before the first R3F pointer event so autoplay unlocking runs in
-    // the browser's native capture phase. Pre-decoding also removes the
-    // silent delay on the first key interaction.
     installAudioUnlock();
     const ctx = getAudioContext();
     if (ctx) void loadKeySounds(ctx);
@@ -780,12 +750,6 @@ function Keyboard({ mobile }: { mobile: boolean }) {
     };
   }, [keycapGeom, baseGeom]);
 
-  const hoveredIcon = useMemo(() => {
-    if (!hoveredKey) return null;
-    const [r, c] = hoveredKey.split("-").map(Number);
-    return SKILLS[r]?.[c] ?? null;
-  }, [hoveredKey]);
-
   const keycapY = BASE_HEIGHT / 2 + KEYCAP_HEIGHT / 2 + 0.005;
   const keycaps = [];
   for (let row = 0; row < ROWS; row++) {
@@ -799,6 +763,7 @@ function Keyboard({ mobile }: { mobile: boolean }) {
       // by eye — any non-degenerate combo works, just avoid exact multiples
       // of 2π between neighbours.
       const wavePhase = row * 0.9 + col * 0.55;
+      const isFocused = focusedSlug === icon.slug;
       keycaps.push(
         <Keycap
           key={id}
@@ -807,7 +772,7 @@ function Keyboard({ mobile }: { mobile: boolean }) {
           soundSeed={row * COLS + col}
           isMobile={isMobile}
           icon={icon}
-          hovered={hoveredKey === id}
+          hovered={hoveredKey === id || isFocused}
           highlightsRef={highlightsRef}
           activeSectionRef={activeSectionRef}
           wavePhase={wavePhase}
@@ -839,51 +804,8 @@ function Keyboard({ mobile }: { mobile: boolean }) {
           yaw/pitch/scale don't warp the text. Placed in world space, to the
           left of the tilted keyboard, with its own matching isometric yaw +
           a small roll so the baseline rises left-to-right like Naresh's. */}
-      {!mobile && activeSection === "stack" && hoveredIcon && (
-        <Suspense fallback={null}>
-          <group
-            //position={[-2.6, -0.5, 0.9]}
-            position={[-1.7,0,1.5]}
-            //rotation={[-0.8, Math.PI * -0.1  , Math.PI * 4.33]}
-            rotation={[-1,0.2,1.03]}
-          >
-            {/* No <Center>: Text3D renders with its first letter anchored
-                at the group's origin (X=0) and baseline at Y=0. So the first
-                letter stays fixed regardless of how long the title is. */}
-            <Text3D
-              key={hoveredIcon.slug}
-              font="/fonts/space_grotesk_bold.typeface.json"
-              size={0.25}
-              height={0.1}
-              curveSegments={12}
-              bevelEnabled={false}
-            >
-              {hoveredIcon.title}
-              {/* Naresh-style: pure white, no emissive. All the shading
-                  comes from the directional light hitting the faces — the
-                  top face catches it, side walls fall into shadow, giving
-                  real 3D depth instead of a flat uniform glow. */}
-              <meshStandardMaterial
-                color="#ffffff"
-                roughness={0.55}
-                metalness={0}
-              />
-            </Text3D>
-            <Text
-              position={[0, -0.05, 0]}
-              fontSize={0.12}
-              color="#a6c5e4"
-              anchorX="left"
-              anchorY="top"
-              maxWidth={2.2}
-              lineHeight={1.25}
-              overflowWrap="break-word"
-            >
-              {t(`keyboard.taglines.${hoveredIcon.slug}`)}
-            </Text>
-          </group>
-        </Suspense>
-      )}
+      {/* Skill copy now lives in the DOM stack panel for clearer reading
+          and mobile parity — keep the 3D scene focused on the keyboard. */}
     </>
   );
 }

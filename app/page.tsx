@@ -10,11 +10,10 @@ import CopyEmail from "@/components/CopyEmail";
 import SeasonPicker from "@/components/SeasonPicker";
 import LanguagePicker from "@/components/LanguagePicker";
 import ProjectModal from "@/components/ProjectModal";
-import ProjectCardMedia from "@/components/ProjectCardMedia";
+import StackExplorer from "@/components/StackExplorer";
 import { useLanguage } from "@/components/LanguageProvider";
 import { useIsMobile } from "@/lib/useIsMobile";
 import { projects, type ProjectRecord } from "@/lib/projects";
-import { SKILLS_FLAT } from "@/lib/skills";
 import type { Lang } from "@/lib/i18n";
 
 const EMAIL = "mohammad.r.javaheri@gmail.com";
@@ -41,67 +40,12 @@ function HeroWord({
   );
 }
 
-function ProjectNavigation({
-  activeIndex,
-  total,
-  onMove,
-  ariaLabel,
-  previousLabel,
-  nextLabel,
-}: {
-  activeIndex: number;
-  total: number;
-  onMove: (offset: number) => void;
-  ariaLabel: string;
-  previousLabel: string;
-  nextLabel: string;
-}) {
-  return (
-    <div className="projects-controls projects-controls--showcase pointer-events-auto" aria-label={ariaLabel}>
-      <div className="projects-controls__buttons">
-        <button
-          type="button"
-          className="projects-control"
-          onClick={() => onMove(-1)}
-          aria-label={previousLabel}
-          data-cursor="hover"
-        >
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-            <path d="M19 12H5M11 6l-6 6 6 6" />
-          </svg>
-          <span>{previousLabel}</span>
-        </button>
-        <button
-          type="button"
-          className="projects-control projects-control--next"
-          onClick={() => onMove(1)}
-          aria-label={nextLabel}
-          data-cursor="hover"
-        >
-          <span>{nextLabel}</span>
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-            <path d="M5 12h14M13 6l6 6-6 6" />
-          </svg>
-        </button>
-      </div>
-      <span className="projects-progress" aria-live="polite">
-        <span>{String(activeIndex + 1).padStart(2, "0")}</span>
-        <span aria-hidden>/</span>
-        <span>{String(total).padStart(2, "0")}</span>
-      </span>
-    </div>
-  );
-}
-
 export default function Home() {
   const { t, lang } = useLanguage();
   const isMobile = useIsMobile();
   const [isHeaderScrolled, setIsHeaderScrolled] = useState(false);
   const [projectRecords, setProjectRecords] = useState<ProjectRecord[]>(projects);
-  const [activeProjectIndex, setActiveProjectIndex] = useState(0);
   const [selectedProject, setSelectedProject] = useState<ProjectRecord | null>(null);
-  const activeProject = projectRecords[activeProjectIndex] ?? projectRecords[0];
-  const activeProjectUrl = activeProject?.url?.trim() || null;
 
   useEffect(() => {
     let mounted = true;
@@ -110,11 +54,9 @@ export default function Home() {
       .then((remoteProjects: ProjectRecord[] | null) => {
         if (!mounted || !Array.isArray(remoteProjects) || remoteProjects.length === 0) return;
         setProjectRecords(remoteProjects);
-        setActiveProjectIndex((index) => Math.min(index, remoteProjects.length - 1));
       })
       .catch(() => {
-        // The bundled JSON remains a resilient fallback if the content API is
-        // temporarily offline or has not been started yet.
+        // Bundled JSON remains the fallback if the content API is offline.
       });
     return () => {
       mounted = false;
@@ -130,10 +72,6 @@ export default function Home() {
     window.addEventListener("scroll", updateHeaderState, { passive: true });
     return () => window.removeEventListener("scroll", updateHeaderState);
   }, []);
-
-  const goToProject = (offset: number) => {
-    setActiveProjectIndex((index) => (index + offset + projectRecords.length) % projectRecords.length);
-  };
 
   return (
     <SmoothScroll>
@@ -233,103 +171,85 @@ export default function Home() {
             </div>
           </section>
 
-          <section data-kb-section="stack" className="relative md:min-h-[160vh] p-6 sm:p-10 md:p-14">
-            <div className="relative md:h-[125vh]">
-              <div className="md:sticky md:top-28 text-center">
-                <Reveal><h2 className="text-5xl sm:text-7xl md:text-8xl font-bold tracking-[-0.03em] text-ice-50 leading-[0.95]">{t("stack.title")}</h2></Reveal>
-                <Reveal delay={120}><p className="mt-3 text-sm sm:text-base text-ice-400"><span className="hidden md:inline">{t("stack.hint")}</span><span className="md:hidden">{t("stack.hintMobile")}</span></p></Reveal>
-              </div>
-              <div className="stack-skill-grid pointer-events-auto">
-                {SKILLS_FLAT.map((s, index) => (
-                  <article key={s.slug} className="stack-skill-card">
-                    <span className="stack-skill-card__number" aria-hidden>{String(index + 1).padStart(2, "0")}</span>
-                    <span className="stack-skill-card__icon" aria-hidden>
-                      <svg viewBox="0 0 24 24" width="20" height="20" fill={`#${s.hex}`}><path d={s.path} /></svg>
-                    </span>
-                    <span className="stack-skill-card__copy">
-                      <span className="stack-skill-card__title">{s.title}</span>
-                      <span className="stack-skill-card__tagline">{t(`keyboard.taglines.${s.slug}`)}</span>
-                    </span>
-                  </article>
-                ))}
-              </div>
-            </div>
+          <section data-kb-section="stack" className="stack-section relative py-16 md:py-20 px-6 sm:px-10 md:px-14">
+            <Reveal>
+              <StackExplorer />
+            </Reveal>
           </section>
 
-          <section className="projects-section relative py-24 md:min-h-[125vh] p-6 sm:p-10 md:p-14 overflow-hidden">
-            <span aria-hidden className="watermark hidden md:block top-1/2 -translate-y-1/2 right-[-2vw]">03</span>
-            <div className="relative z-10 w-full max-w-[120rem] mx-auto">
-              <div className="projects-heading">
-                <Reveal><p className="font-mono text-sm text-ice-400 mb-3">{t("projects.kicker")}</p></Reveal>
-                <Reveal delay={80}><h2 className="projects-title font-bold tracking-[-0.04em] text-ice-50 leading-[0.92]">{t("projects.title")}</h2></Reveal>
-                <Reveal delay={140}><p className="projects-subtitle mt-4 max-w-xl text-ice-300">{t("projects.subtitle")}</p></Reveal>
-              </div>
+          <section className="projects-section relative py-16 md:py-20 px-6 sm:px-10 md:px-14">
+            <div className="projects-wrap pointer-events-auto" id="projects-showcase">
+              <header className="projects-head">
+                <Reveal>
+                  <h2 className="projects-head__title">{t("projects.title")}</h2>
+                </Reveal>
+                <Reveal delay={80}>
+                  <p className="projects-head__sub">{t("projects.subtitle")}</p>
+                </Reveal>
+              </header>
 
-              <div className="projects-rail pointer-events-auto" id="projects-showcase">
-                <article key={activeProject.num} data-kb-section={activeProject.section} data-kb-highlights={activeProject.highlights.join(",")} className="projects-rail__item projects-rail__item--active">
-                    <div className="project-card project-card--left">
-                      <Reveal delay={200} className="project-card__navigation">
-                        <ProjectNavigation
-                          activeIndex={activeProjectIndex}
-                          total={projectRecords.length}
-                          onMove={goToProject}
-                          ariaLabel={t("projects.navigation")}
-                          previousLabel={t("projects.previous")}
-                          nextLabel={t("projects.next")}
-                        />
-                      </Reveal>
-                      <div className="project-card__visual">
-                        <div className="project-card__browser">
-                          <div className="project-card__browser-bar">
-                            <span className="project-card__dots" aria-hidden><i /><i /><i /></span>
-                            <span className="project-card__url">{activeProjectUrl ? activeProjectUrl.replace(/^https?:\/\//, "").replace(/\/$/, "") : activeProject.slug}</span>
-                            <span className="project-card__live-dot" aria-hidden />
-                          </div>
-                          <ProjectCardMedia
-                            media={activeProject.media}
-                            alt={`${pick(activeProject.name, lang)} project image`}
-                            onOpen={() => setSelectedProject(activeProject)}
-                            imageLabel={t("projects.viewImages")}
-                          />
-                        </div>
-                      </div>
+              <ul className="project-grid">
+                {projectRecords.map((project, index) => {
+                  const url = project.url?.trim() || null;
+                  const thumb = project.media[0];
+                  return (
+                    <li key={project.slug}>
+                      <article
+                        data-kb-section={project.section}
+                        data-kb-highlights={project.highlights.join(",")}
+                        className="project-card-mini"
+                      >
+                        <button
+                          type="button"
+                          className="project-card-mini__media"
+                          onClick={() => setSelectedProject(project)}
+                          data-cursor="hover"
+                          aria-label={`${t("projects.viewMore")}: ${pick(project.name, lang)}`}
+                        >
+                          {thumb ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={thumb} alt="" loading="lazy" />
+                          ) : (
+                            <span className="project-card-mini__placeholder">{project.num}</span>
+                          )}
+                          <span className="project-card-mini__num">{String(index + 1).padStart(2, "0")}</span>
+                        </button>
 
-                      <div className="project-card__content">
-                        <div className="project-card__meta">
-                          <span>{activeProject.num} · {t("projects.kicker")}</span>
-                          <span>{activeProjectUrl ? t("projects.projectLabel") : t("projects.projectWithoutLink")}</span>
-                        </div>
-                        <Reveal><h2 className="project-card__title font-semibold tracking-tight text-ice-50 leading-[1.05] mb-4">{pick(activeProject.name, lang)}</h2></Reveal>
-                        <Reveal delay={100}><p className="text-base sm:text-lg text-ice-200 leading-relaxed mb-6">{pick(activeProject.desc, lang)}</p></Reveal>
-                        <Reveal delay={160}>
-                          <div className="flex flex-wrap gap-1.5 mb-7">
-                            {activeProject.stack.map((s) => <span key={s} data-cursor="hover" className="frost-chip">{s}</span>)}
+                        <div className="project-card-mini__body">
+                          <h3 className="project-card-mini__title">{pick(project.name, lang)}</h3>
+                          <p className="project-card-mini__desc">{pick(project.desc, lang)}</p>
+                          <div className="project-card-mini__tags">
+                            {project.stack.slice(0, 4).map((tech) => (
+                              <span key={tech}>{tech}</span>
+                            ))}
                           </div>
-                        </Reveal>
-                        <Reveal delay={220}>
-                          <div className="flex flex-wrap gap-3">
-                            {activeProjectUrl && (
-                              <a href={activeProjectUrl} target="_blank" rel="noopener noreferrer" data-cursor="hover" data-magnetic className="frost-btn frost-btn--primary">
-                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><rect x="3" y="4" width="18" height="14" rx="2" /><path d="M8 21h8M12 18v3" /></svg>
+                          <div className="project-card-mini__actions">
+                            <button
+                              type="button"
+                              className="project-card-mini__link"
+                              onClick={() => setSelectedProject(project)}
+                              data-cursor="hover"
+                            >
+                              {t("projects.viewMore")}
+                            </button>
+                            {url && (
+                              <a
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="project-card-mini__link project-card-mini__link--primary"
+                                data-cursor="hover"
+                              >
                                 {t("projects.openProject")}
                               </a>
                             )}
-                            <button type="button" onClick={() => setSelectedProject(activeProject)} data-cursor="hover" data-magnetic className="frost-btn">
-                              {t("projects.viewMore")}
-                              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M5 12h14M13 5l7 7-7 7" /></svg>
-                            </button>
                           </div>
-                        </Reveal>
-                        {activeProjectUrl && (
-                          <div className="project-card__footnote">
-                            <span>{t("projects.openProjectHint")}</span>
-                            <a href={activeProjectUrl} target="_blank" rel="noopener noreferrer" data-cursor="hover">{t("projects.openProject")}</a>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                </article>
-              </div>
+                        </div>
+                      </article>
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
           </section>
 

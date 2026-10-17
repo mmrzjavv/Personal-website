@@ -57,8 +57,8 @@ export default function FrozenBackground() {
       // Keep the ambient layer atmospheric without competing with the 3D
       // canvas during scroll, especially on high-density laptop displays.
       const target = Math.min(
-        isCoarsePointer ? 72 : 96,
-        Math.max(isCoarsePointer ? 28 : 40, Math.floor((w * h) / 24000))
+        isCoarsePointer ? 90 : 140,
+        Math.max(isCoarsePointer ? 40 : 64, Math.floor((w * h) / 16000))
       );
       flakes = Array.from({ length: target }, () => makeFlake(true));
     };

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import FrozenKeyboard from "@/components/FrozenKeyboard";
+import KeyboardSafe from "@/components/KeyboardSafe";
 import SmoothScroll from "@/components/smooth-scroll";
 import Reveal from "@/components/Reveal";
 import SectionNav from "@/components/SectionNav";
@@ -10,9 +10,10 @@ import CopyEmail from "@/components/CopyEmail";
 import SeasonPicker from "@/components/SeasonPicker";
 import LanguagePicker from "@/components/LanguagePicker";
 import ProjectModal from "@/components/ProjectModal";
+import ProjectsShowcase from "@/components/ProjectsShowcase";
 import StackExplorer from "@/components/StackExplorer";
 import { useLanguage } from "@/components/LanguageProvider";
-import { useIsMobile } from "@/lib/useIsMobile";
+import { useClientReady, useIsMobile } from "@/lib/useIsMobile";
 import { projects, type ProjectRecord } from "@/lib/projects";
 import type { Lang } from "@/lib/i18n";
 
@@ -43,6 +44,7 @@ function HeroWord({
 export default function Home() {
   const { t, lang } = useLanguage();
   const isMobile = useIsMobile();
+  const clientReady = useClientReady();
   const [isHeaderScrolled, setIsHeaderScrolled] = useState(false);
   const [projectRecords, setProjectRecords] = useState<ProjectRecord[]>(projects);
   const [selectedProject, setSelectedProject] = useState<ProjectRecord | null>(null);
@@ -76,11 +78,10 @@ export default function Home() {
   return (
     <SmoothScroll>
       <div className="relative">
-        {!isMobile && (
-          <div className="fixed inset-0 z-0">
-            <FrozenKeyboard />
-          </div>
-        )}
+        <div className="fixed inset-0 z-0 keyboard-desktop-layer hidden md:block" aria-hidden={isMobile || !clientReady}>
+          {/* Wait for clientReady so phones never spin up a hidden desktop WebGL context */}
+          {clientReady && !isMobile ? <KeyboardSafe /> : null}
+        </div>
 
         <header className={`site-header fixed top-0 inset-x-0 z-50 px-6 sm:px-10 md:px-14 py-5 flex items-center justify-between pointer-events-none ${isHeaderScrolled ? "site-header--scrolled" : ""}`}>
           <div className="site-header__identity flex items-center gap-3 pointer-events-auto">
@@ -122,28 +123,29 @@ export default function Home() {
         <SectionNav />
 
         <main className="relative z-10 pointer-events-none">
-          <section data-kb-section="hero" className="min-h-screen flex flex-col justify-center p-6 sm:p-10 md:p-14">
-            {isMobile && (
-              <div className="hero-keyboard pointer-events-auto">
-                <FrozenKeyboard mobile />
-              </div>
-            )}
-            <div className="mt-2 md:mt-20">
+          <section data-kb-section="hero" className="hero-section min-h-[100svh] flex flex-col justify-start md:justify-center p-6 sm:p-10 md:p-14">
+            {/* Compact top keyboard on phones only — justify-start (not center)
+                so it sits under the header like mmrzjavaheri.ir */}
+            <div className="hero-keyboard pointer-events-auto md:hidden">
+              {clientReady && isMobile ? <KeyboardSafe mobile /> : null}
+            </div>
+
+            <div className="hero-copy mt-2 md:mt-20">
               <p className="text-[11px] uppercase tracking-[0.3em] text-ice-300 mb-5 fade-in-up" style={{ ["--d" as string]: "0ms" }}>
                 {t("hero.greeting")}
               </p>
-              <h1 className="hero-title font-bold tracking-[-0.04em] text-ice-50 leading-[0.92] whitespace-nowrap">
+              <h1 className="hero-title font-bold tracking-[-0.04em] text-ice-50 leading-[0.92]">
                 <HeroWord text={lang === "fa" ? "محمدرضا" : "Mohammadreza"} delay={120} />
                 <br />
                 <HeroWord text={lang === "fa" ? "جواهری" : "Javaheri"} delay={260} className="text-ice-400" />
               </h1>
-              <p className="mt-8 text-base sm:text-lg md:text-xl text-ice-200 max-w-xl leading-relaxed fade-in-up" style={{ ["--d" as string]: "520ms" }}>
+              <p className="mt-6 sm:mt-8 text-base sm:text-lg md:text-xl text-ice-200 max-w-xl leading-relaxed fade-in-up" style={{ ["--d" as string]: "520ms" }}>
                 {t("hero.roleLine")}
                 <br />
                 {t("hero.tagline")}
               </p>
 
-              <div className="mt-10 flex flex-wrap items-center gap-3 pointer-events-auto fade-in-up" style={{ ["--d" as string]: "700ms" }}>
+              <div className="mt-8 sm:mt-10 flex flex-wrap items-center gap-3 pointer-events-auto fade-in-up" style={{ ["--d" as string]: "700ms" }}>
                 <a href="/Mohammadreza-Javaheri-cv.pdf" target="_blank" rel="noopener noreferrer" data-cursor="hover" data-magnetic className="frost-btn frost-btn--primary">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
                     <path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z" />
@@ -165,7 +167,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="mt-10 md:mt-auto flex items-center gap-3 fade-in-up" style={{ ["--d" as string]: "900ms" }}>
+            <div className="mt-8 md:mt-auto flex items-center gap-3 fade-in-up" style={{ ["--d" as string]: "900ms" }}>
               <span className="scroll-indicator"><span>{t("hero.scroll")}</span><span className="scroll-indicator__rail" /></span>
               <span className="text-[11px] uppercase tracking-[0.25em] text-ice-400 hidden sm:inline">{t("hero.keysHint")}</span>
             </div>
@@ -178,85 +180,16 @@ export default function Home() {
           </section>
 
           <section className="projects-section relative py-16 md:py-20 px-6 sm:px-10 md:px-14">
-            <div className="projects-wrap pointer-events-auto" id="projects-showcase">
-              <header className="projects-head">
-                <Reveal>
-                  <h2 className="projects-head__title">{t("projects.title")}</h2>
-                </Reveal>
-                <Reveal delay={80}>
-                  <p className="projects-head__sub">{t("projects.subtitle")}</p>
-                </Reveal>
-              </header>
-
-              <ul className="project-grid">
-                {projectRecords.map((project, index) => {
-                  const url = project.url?.trim() || null;
-                  const thumb = project.media[0];
-                  return (
-                    <li key={project.slug}>
-                      <article
-                        data-kb-section={project.section}
-                        data-kb-highlights={project.highlights.join(",")}
-                        className="project-card-mini"
-                      >
-                        <button
-                          type="button"
-                          className="project-card-mini__media"
-                          onClick={() => setSelectedProject(project)}
-                          data-cursor="hover"
-                          aria-label={`${t("projects.viewMore")}: ${pick(project.name, lang)}`}
-                        >
-                          {thumb ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={thumb} alt="" loading="lazy" />
-                          ) : (
-                            <span className="project-card-mini__placeholder">{project.num}</span>
-                          )}
-                          <span className="project-card-mini__num">{String(index + 1).padStart(2, "0")}</span>
-                        </button>
-
-                        <div className="project-card-mini__body">
-                          <h3 className="project-card-mini__title">{pick(project.name, lang)}</h3>
-                          <p className="project-card-mini__desc">{pick(project.desc, lang)}</p>
-                          <div className="project-card-mini__tags">
-                            {project.stack.slice(0, 4).map((tech) => (
-                              <span key={tech}>{tech}</span>
-                            ))}
-                          </div>
-                          <div className="project-card-mini__actions">
-                            <button
-                              type="button"
-                              className="project-card-mini__link"
-                              onClick={() => setSelectedProject(project)}
-                              data-cursor="hover"
-                            >
-                              {t("projects.viewMore")}
-                            </button>
-                            {url && (
-                              <a
-                                href={url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="project-card-mini__link project-card-mini__link--primary"
-                                data-cursor="hover"
-                              >
-                                {t("projects.openProject")}
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                      </article>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
+            <ProjectsShowcase
+              projects={projectRecords}
+              onSelect={setSelectedProject}
+            />
           </section>
 
           <section data-kb-section="contact" className="relative py-24 md:min-h-screen flex flex-col justify-center p-6 sm:p-10 md:p-14 overflow-hidden">
             <div className="contact-panel relative">
               <Reveal><p className="font-mono text-sm text-ice-400 mb-3">{t("contact.kicker")}</p></Reveal>
-              <Reveal delay={80}><h2 className="text-4xl sm:text-6xl font-semibold tracking-tight text-ice-50 mb-6">{t("contact.title")}</h2></Reveal>
+              <Reveal delay={80}><h2 className="contact-title text-3xl sm:text-5xl md:text-6xl font-semibold tracking-tight text-ice-50 mb-6">{t("contact.title")}</h2></Reveal>
               <Reveal delay={160}><p className="text-ice-200 mb-10">{t("contact.body")}</p></Reveal>
               <Reveal delay={240}>
                 <div className="contact-actions pointer-events-auto">

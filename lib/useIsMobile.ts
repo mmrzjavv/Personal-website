@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 // Width-based mobile detection shared across the page + 3D scene. Uses
 // matchMedia so it tracks viewport changes (rotation, resize, desktop window
@@ -26,4 +26,15 @@ function getServerSnapshot(): boolean {
 
 export function useIsMobile(): boolean {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}
+
+/** True only after the first client paint — use before mounting WebGL so phones
+ *  never briefly create the desktop canvas (display:none still allocates a
+ *  GPU context and often kills the real mobile keyboard on iOS/Android). */
+export function useClientReady(): boolean {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    setReady(true);
+  }, []);
+  return ready;
 }

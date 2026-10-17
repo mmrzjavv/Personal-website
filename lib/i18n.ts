@@ -82,6 +82,11 @@ export const DICT = {
     viewMore: { fa: "مشاهده جزئیات", en: "View details" },
     viewImages: { fa: "مشاهده تصاویر", en: "View images" },
     openProject: { fa: "ورود به پروژه", en: "Open project" },
+    showMore: { fa: "نمایش پروژه‌های بیشتر", en: "Show more projects" },
+    showingCount: {
+      fa: "{shown} از {total} پروژه",
+      en: "{shown} of {total} projects",
+    },
     projectLabel: { fa: "لینک پروژه", en: "project link" },
     projectWithoutLink: { fa: "نمونه‌کار", en: "showcase" },
     openProjectHint: { fa: "لینک مستقیم پروژه در یک تب جدید باز می‌شود.", en: "The project link opens directly in a new tab." },

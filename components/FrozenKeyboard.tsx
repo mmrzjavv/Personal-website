@@ -243,7 +243,9 @@ function makeIconTexture(
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 4;
+  tex.anisotropy = size >= 128 ? 2 : 1;
+  tex.generateMipmaps = size >= 128;
+  tex.minFilter = size >= 128 ? THREE.LinearMipmapLinearFilter : THREE.LinearFilter;
   tex.needsUpdate = true;
   return tex;
 }
@@ -431,8 +433,8 @@ function Keycap({
   );
 
   const iconTexture = useMemo(
-    () => makeIconTexture(icon.path, `#${icon.hex}`),
-    [icon.path, icon.hex]
+    () => makeIconTexture(icon.path, `#${icon.hex}`, isMobile ? 160 : 256),
+    [icon.path, icon.hex, isMobile]
   );
 
   // Stable THREE.Color objects so useFrame can lerp in place (no garbage
@@ -822,61 +824,92 @@ export default function FrozenKeyboard({
       // off-axis desktop composition.
       camera={
         mobile
-          ? { position: [0, 1.2, 7.1], fov: 24 }
+          ? { position: [0, 1.05, 6.6], fov: 26 }
           : { position: [1.5, 3.6, 11], fov: 22 }
       }
+      // Cap DPR on phones (full retina + Environment FBO was crashing WebGL).
       dpr={mobile ? [1, 1.75] : [1, 1.25]}
       gl={{
         antialias: true,
         alpha: true,
-        powerPreference: "high-performance",
+        depth: true,
+        stencil: false,
+        powerPreference: "default",
+        failIfMajorPerformanceCaveat: false,
       }}
-      style={{ width: "100%", height: "100%", touchAction: "none" }}
+      // pan-y keeps vertical page scroll alive on phones; "none" was trapping
+      // every touch and making the portfolio feel frozen.
+      style={{
+        position: "absolute",
+        inset: 0,
+        width: "100%",
+        height: "100%",
+        touchAction: mobile ? "pan-y" : "none",
+      }}
+      onCreated={({ gl }) => {
+        gl.domElement.style.touchAction = mobile ? "pan-y" : "none";
+        gl.domElement.style.position = "absolute";
+        gl.domElement.style.inset = "0";
+        gl.domElement.style.width = "100%";
+        gl.domElement.style.height = "100%";
+        const canvas = gl.domElement;
+        const onLost = (e: Event) => {
+          e.preventDefault();
+          console.warn("WebGL context lost (keyboard)");
+        };
+        canvas.addEventListener("webglcontextlost", onLost, false);
+      }}
     >
       {/* Canvas is transparent so the FrozenBackground (snow + aurora) shows
           through behind/around the keyboard. */}
 
-      {/* Local environment map built from Lightformer quads — no external
-          HDR fetch, so the scene works offline. Gives the glass keycaps
-          soft icy highlights without relying on drei's CDN. */}
-      <Environment resolution={32} environmentIntensity={0.25}>
-        <Lightformer
-          intensity={1.1}
-          color="#ffffff"
-          position={[0, 6, -4]}
-          rotation={[0, 0, 0]}
-          scale={[12, 6, 1]}
-        />
-        <Lightformer
-          intensity={0.7}
-          color="#ffffff"
-          position={[-6, 2, 2]}
-          rotation={[0, Math.PI / 2, 0]}
-          scale={[6, 4, 1]}
-        />
-        <Lightformer
-          intensity={0.5}
-          color="#ffffff"
-          position={[6, 3, 1]}
-          rotation={[0, -Math.PI / 2, 0]}
-          scale={[6, 4, 1]}
-        />
-        <Lightformer
-          intensity={0.35}
-          color="#ffffff"
-          position={[0, -4, 3]}
-          rotation={[Math.PI / 2, 0, 0]}
-          scale={[8, 8, 1]}
-        />
-      </Environment>
+      {/* Environment FBO is desktop-only — on phones it often exhausts the
+          single WebGL budget and the whole keyboard fails to appear. */}
+      {!mobile && (
+        <Environment resolution={32} environmentIntensity={0.25}>
+          <Lightformer
+            intensity={1.1}
+            color="#ffffff"
+            position={[0, 6, -4]}
+            rotation={[0, 0, 0]}
+            scale={[12, 6, 1]}
+          />
+          <Lightformer
+            intensity={0.7}
+            color="#ffffff"
+            position={[-6, 2, 2]}
+            rotation={[0, Math.PI / 2, 0]}
+            scale={[6, 4, 1]}
+          />
+          <Lightformer
+            intensity={0.5}
+            color="#ffffff"
+            position={[6, 3, 1]}
+            rotation={[0, -Math.PI / 2, 0]}
+            scale={[6, 4, 1]}
+          />
+          <Lightformer
+            intensity={0.35}
+            color="#ffffff"
+            position={[0, -4, 3]}
+            rotation={[Math.PI / 2, 0, 0]}
+            scale={[8, 8, 1]}
+          />
+        </Environment>
+      )}
       {/* Naresh-style lighting: low ambient + strong single directional from
           upper-left gives crisp top-bright / sides-shadowed contrast. The
           hemisphere adds a subtle sky-ground gradient so the darkest faces
           still read as "the lower faces" instead of pitch-black. */}
-      <ambientLight intensity={0.15} />
-      <directionalLight position={[-5, 8, 3]} intensity={2.2} />
+      <ambientLight intensity={mobile ? 0.28 : 0.15} />
+      <directionalLight position={[-5, 8, 3]} intensity={mobile ? 2.0 : 2.2} />
+      <directionalLight
+        position={[4, 3, 5]}
+        intensity={mobile ? 0.55 : 0}
+        color="#cfe0f5"
+      />
       <hemisphereLight
-        intensity={0.25}
+        intensity={mobile ? 0.35 : 0.25}
         color="#eaf2fb"
         groundColor="#0a1428"
       />

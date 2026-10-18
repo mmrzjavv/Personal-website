@@ -1,14 +1,39 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Reveal from "@/components/Reveal";
 import { useLanguage } from "@/components/LanguageProvider";
-import { useClientReady, useIsMobile } from "@/lib/useIsMobile";
 import type { Lang } from "@/lib/i18n";
 import type { ProjectRecord } from "@/lib/projects";
 
 function pick<T>(loc: { fa: T; en: T }, lang: Lang): T {
   return loc[lang];
+}
+
+/** How many cards fit in one row at the current breakpoint. */
+function useRowSize(): number {
+  const [rowSize, setRowSize] = useState(3);
+
+  useEffect(() => {
+    const mqLg = window.matchMedia("(min-width: 1024px)");
+    const mqSm = window.matchMedia("(min-width: 640px)");
+
+    const update = () => {
+      if (mqLg.matches) setRowSize(3);
+      else if (mqSm.matches) setRowSize(2);
+      else setRowSize(2);
+    };
+
+    update();
+    mqLg.addEventListener("change", update);
+    mqSm.addEventListener("change", update);
+    return () => {
+      mqLg.removeEventListener("change", update);
+      mqSm.removeEventListener("change", update);
+    };
+  }, []);
+
+  return rowSize;
 }
 
 export default function ProjectsShowcase({
@@ -19,50 +44,14 @@ export default function ProjectsShowcase({
   onSelect: (project: ProjectRecord) => void;
 }) {
   const { t, lang } = useLanguage();
-  const isMobile = useIsMobile();
-  const clientReady = useClientReady();
-  const mobileCarousel = clientReady && isMobile;
-  const trackRef = useRef<HTMLUListElement>(null);
-  const [activeIdx, setActiveIdx] = useState(0);
+  const rowSize = useRowSize();
+  const [expanded, setExpanded] = useState(false);
 
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track || !mobileCarousel) return;
-
-    const slides = Array.from(
-      track.querySelectorAll<HTMLElement>("[data-project-slide]")
-    );
-    if (slides.length === 0) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        let best: IntersectionObserverEntry | null = null;
-        for (const entry of entries) {
-          if (!best || entry.intersectionRatio > best.intersectionRatio) {
-            best = entry;
-          }
-        }
-        if (!best?.isIntersecting) return;
-        const idx = Number(
-          (best.target as HTMLElement).dataset.projectSlide ?? "-1"
-        );
-        if (idx >= 0) setActiveIdx(idx);
-      },
-      { root: track, threshold: [0.45, 0.65, 0.85] }
-    );
-
-    slides.forEach((slide) => observer.observe(slide));
-    return () => observer.disconnect();
-  }, [mobileCarousel, projects.length]);
-
-  const goTo = (index: number) => {
-    const track = trackRef.current;
-    const slide = track?.querySelector<HTMLElement>(
-      `[data-project-slide="${index}"]`
-    );
-    slide?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-    setActiveIdx(index);
-  };
+  const hasMore = projects.length > rowSize;
+  const visibleProjects = expanded || !hasMore ? projects : projects.slice(0, rowSize);
+  const countLabel = t("projects.showingCount")
+    .replace("{shown}", String(visibleProjects.length))
+    .replace("{total}", String(projects.length));
 
   return (
     <div className="projects-wrap pointer-events-auto" id="projects-showcase">
@@ -71,22 +60,16 @@ export default function ProjectsShowcase({
           <h2 className="projects-head__title">{t("projects.title")}</h2>
         </Reveal>
         <Reveal delay={80}>
-          <p className="projects-head__sub">
-            {mobileCarousel ? t("projects.scrollHint") : t("projects.subtitle")}
-          </p>
+          <p className="projects-head__sub">{t("projects.subtitle")}</p>
         </Reveal>
       </header>
 
-      <ul
-        ref={trackRef}
-        className={`project-grid${mobileCarousel ? " project-grid--carousel" : ""}`}
-        aria-label={t("projects.title")}
-      >
-        {projects.map((project, index) => {
+      <ul className="project-grid" aria-label={t("projects.title")}>
+        {visibleProjects.map((project, index) => {
           const url = project.url?.trim() || null;
           const thumb = project.media[0];
           return (
-            <li key={project.slug} data-project-slide={index}>
+            <li key={project.slug}>
               <article
                 data-kb-section={project.section}
                 data-kb-highlights={project.highlights.join(",")}
@@ -123,7 +106,7 @@ export default function ProjectsShowcase({
                     {pick(project.desc, lang)}
                   </p>
                   <div className="project-card-mini__tags">
-                    {project.stack.slice(0, mobileCarousel ? 3 : 4).map((tech) => (
+                    {project.stack.slice(0, 4).map((tech) => (
                       <span key={tech}>{tech}</span>
                     ))}
                   </div>
@@ -155,40 +138,17 @@ export default function ProjectsShowcase({
         })}
       </ul>
 
-      {mobileCarousel && projects.length > 1 && (
-        <div className="projects-carousel-nav" aria-label={t("projects.navigation")}>
+      {hasMore && (
+        <div className="projects-more">
+          <p className="projects-more__count">{countLabel}</p>
           <button
             type="button"
-            className="projects-carousel-nav__btn"
+            className="projects-more__btn"
             data-cursor="hover"
-            disabled={activeIdx <= 0}
-            onClick={() => goTo(activeIdx - 1)}
-            aria-label={t("projects.previous")}
+            aria-expanded={expanded}
+            onClick={() => setExpanded((value) => !value)}
           >
-            ‹
-          </button>
-          <div className="projects-dots" role="tablist">
-            {projects.map((project, index) => (
-              <button
-                key={project.slug}
-                type="button"
-                role="tab"
-                aria-selected={index === activeIdx}
-                aria-label={`${t("projects.jumpTo")} ${index + 1}`}
-                className={`projects-dot${index === activeIdx ? " projects-dot--active" : ""}`}
-                onClick={() => goTo(index)}
-              />
-            ))}
-          </div>
-          <button
-            type="button"
-            className="projects-carousel-nav__btn"
-            data-cursor="hover"
-            disabled={activeIdx >= projects.length - 1}
-            onClick={() => goTo(activeIdx + 1)}
-            aria-label={t("projects.next")}
-          >
-            ›
+            {expanded ? t("projects.showLess") : t("projects.showMore")}
           </button>
         </div>
       )}

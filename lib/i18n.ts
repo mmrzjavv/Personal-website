@@ -83,6 +83,7 @@ export const DICT = {
     viewImages: { fa: "مشاهده تصاویر", en: "View images" },
     openProject: { fa: "ورود به پروژه", en: "Open project" },
     showMore: { fa: "نمایش پروژه‌های بیشتر", en: "Show more projects" },
+    showLess: { fa: "نمایش کمتر", en: "Show less" },
     showingCount: {
       fa: "{shown} از {total} پروژه",
       en: "{shown} of {total} projects",

@@ -61,7 +61,7 @@
         "en": "Soha brings appointments and customer communication into one simple experience — from the public booking flow to an operational dashboard for tracking requests and information."
       },
       "url": "https://sohacrm.ir/",
-      "media": ["/projects/crm-landing.png", "/projects/crm-dashboard-v2.png"],
+      "media": ["/projects/crm-dashboard-v2.png", "/projects/crm-landing.png"],
       "highlights": ["react", "nextdotjs", "typescript"],
       "align": "left",
       "section": "project3"
